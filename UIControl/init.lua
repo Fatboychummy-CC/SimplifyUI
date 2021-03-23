@@ -116,17 +116,28 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     expect(1, self, "table")
 
     -- get position offset.
-    local startX, startY = 1, 1
+    local startX, startY = self:getLocalPosition()
 
+    local maxY = math.min(self.body.h, self.h)
+    local maxX = math.min(self.body.w, self.w)
 
-    for y = 1, #self.body do
-      for x = 1, #self.body[y] do
-        local pixel = self.body[y][x]
-        if pixel.nt then
-          self.parentTerm.setCursorPos(x, y)
+    for y = 1, maxY do
+      for x = 1, maxX do
+        local col = self.body[y]
+        if not col then break end
+        local pixel = col[x]
+        if pixel then
+          self.parentTerm.setCursorPos(startX - 1 + x, startY - 1 + y)
           self.parentTerm.blit(pixel.c, pixel.fg, pixel.bg)
         end
       end
+    end
+
+    self.parentTerm.setCursorPos(startX, startY)
+    self.parentTerm.blit("#", "0", "a")
+
+    for i = 1, #self.children do
+      self.children[i]:draw()
     end
 
     return self
@@ -153,8 +164,8 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     expect(4, bg, "string")
     c, fg, bg = c:sub(1, 1), fg:sub(1, 1), bg:sub(1, 1)
 
-    for y = 1, self.body.h do
-      for x = 1, self.body.w do
+    for y = 1, self.h do
+      for x = 1, self.w do
         if not self.body[y] then
           rawset(self.body, y, restrictedTable{})
         end
@@ -163,6 +174,8 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
         end
       end
     end
+    rawset(self.body, 'w', self.w)
+    rawset(self.body, 'h', self.h)
   end
 
   function mt.__index.setAnchor(self, x, y)
