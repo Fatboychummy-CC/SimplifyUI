@@ -138,6 +138,33 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     end
   end
 
+  function mt.__index.clear(self)
+    expect(1, self, "table")
+
+    rawset(self, "body", restrictedTable{w = 0, h = 0})
+
+    return self
+  end
+
+  function mt.__index.floodBackground(self, c, fg, bg)
+    expect(1, self, "table")
+    expect(2, c, "string")
+    expect(3, fg, "string")
+    expect(4, bg, "string")
+    c, fg, bg = c:sub(1, 1), fg:sub(1, 1), bg:sub(1, 1)
+
+    for y = 1, self.body.h do
+      for x = 1, self.body.w do
+        if not self.body[y] then
+          rawset(self.body, y, restrictedTable{})
+        end
+        if not self.body[y][x] then
+          rawset(self.body[y], x, restrictedTable{c = c, fg = fg, bg = bg})
+        end
+      end
+    end
+  end
+
   function mt.__index.setAnchor(self, x, y)
     expect(1, self, "table")
     expect(2, x, "number")
