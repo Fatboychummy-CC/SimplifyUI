@@ -18,6 +18,11 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
   end
 
   local mt = {__index = {}}
+  local deepmt = {__index = {}}
+
+  local function restrictedTable(in)
+    return setmetatable(in or {}, deepmt)
+  end
 
   local uiObject = setmetatable({
     classname = "UIControl",
@@ -25,16 +30,21 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     y = y,
     w = w,
     h = h,
-    body = {},
+    body = restrictedTable{w = 0, h = 0},
     parentTerm = parentTerm,
     parent = parent,
-    children = {},
+    children = restrictedTable{},
     name = name,
-    isUIObject = true
+    isUIObject = true,
+    pivot = restrictedTable{0, 0},
+    anchor = restrictedTable{0, 0}
   }, mt)
 
-  uiObject.pivot = {0, 0}
-  uiObject.anchor = {0, 0}
+  local function blockNewIndex()
+    error("Assigning manually is restricted. Use setter methods instead.", 2)
+  end
+
+  deepmt.__newindex = blockNewIndex
 
   -- Crawl backwards through list of parents.
   -- Get location this object should be drawn at.
@@ -75,17 +85,13 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     return px, py
   end
 
-  function mt.__index.getPosition(self)
-    return calcTotalPositionOffset(self)
-  end
-
   function mt.__index.resize(self, w, h)
     expect(1, self, "table")
     expect(2, x, "number")
     expect(3, y, "number")
 
-    self.w = w
-    self.h = h
+    rawset(self, 'w', w)
+    rawset(self, 'h', h)
 
     return self
   end
@@ -96,8 +102,8 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     expect(2, x, "number")
     expect(3, y, "number")
 
-    self.x = x
-    self.y = y
+    rawset(self, 'x', x)
+    rawset(self, 'y', y)
 
     return self
   end
@@ -139,7 +145,7 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     Between0and1(x, 2, "UIWindow.setAnchor")
     Between0and1(y, 3, "UIWindow.setAnchor")
 
-    self.anchor = {x, y}
+    rawset(self, "anchor", restrictedTable{x, y})
 
     return self
   end
@@ -151,7 +157,50 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     Between0and1(x, 2, "UIWindow.setPivot")
     Between0and1(y, 3, "UIWindow.setPivot")
 
-    self.pivot = {x, y}
+    rawset(self, "pivot", restrictedTable{})
+
+    return self
+  end
+
+  -- Check for loops when assigning a new parent.
+  local function validateNoLoops(uiObject, parent)
+    local current = parent
+    while current and current.parent do
+      if parent == uiObject then
+        error("Cannot assign parent: Loop detected.", 3)
+      end
+      current = current.parent
+    end
+  end
+
+  -- set this uiObject's parent.
+  function mt.__index.setParent(self, parent)
+    -- check parent is valid uiobject
+    if parent == nil then
+      return
+    elseif type(parent) ~= "table" or not UIControl.isValid(parent) then
+      error("Cannot assign parent to non-UIObject.", 2)
+    end
+
+    -- remove from old parent.
+    if self.parent then
+      for i = 1, #self.parent.children do
+        if self.parent.children[i] == self then
+          table.remove(self.parent.children, i)
+        end
+      end
+    end
+
+    rawset(self, "parent", parent)
+    validateNoLoops(self, parent)
+
+    -- add to new parent, if needed.
+    for i = 1, #parent.children do
+      if parent.children[i] == self then
+        return
+      end
+    end
+    table.insert(parent.children, self)
 
     return self
   end
@@ -181,55 +230,7 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     return nil
   end
 
-  -- Check for loops when assigning a new parent.
-  local function validateNoLoops(uiObject, parent)
-    local current = parent
-    while current and current.parent do
-      if parent == uiObject then
-        error("Cannot assign parent: Loop detected.", 3)
-      end
-      current = current.parent
-    end
-  end
-
-  -- check if we're changing the parent value
-  -- if so, move children from A to B
-  -- t: self
-  -- k: key
-  -- v: parent
-  function mt.__newindex(t, k, v)
-    if k == "parent" then
-      -- check parent is valid uiobject
-      if v == nil then
-        return
-      elseif type(v) ~= "table" or not UIControl.isValid(v) then
-        error("Cannot assign parent to non-UIObject.", 2)
-      end
-
-      -- remove from old parent.
-      if t.parent then
-        for i = 1, #t.parent.children do
-          if t.parent.children[i] == t then
-            table.remove(t.parent.children, i)
-          end
-        end
-      end
-
-      rawset(t, "parent", v)
-      validateNoLoops(t, v)
-
-      -- add to new parent, if needed.
-      for i = 1, #v.children do
-        if v.children[i] == t then
-          return
-        end
-      end
-      table.insert(v.children, t)
-    else
-      -- if it's not setting the parent who gives a flying fuck?
-      rawset(t, k, v)
-    end
-  end
+  mt.__newindex = blockNewIndex
 
   -- tostring like function and table, but more info.
   function mt.__tostring(v)
