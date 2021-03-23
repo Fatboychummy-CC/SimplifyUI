@@ -20,8 +20,8 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
   local mt = {__index = {}}
   local deepmt = {__index = {}}
 
-  local function restrictedTable(in)
-    return setmetatable(in or {}, deepmt)
+  local function restrictedTable(t)
+    return setmetatable(t or {}, deepmt)
   end
 
   local uiObject = setmetatable({
@@ -184,7 +184,7 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     Between0and1(x, 2, "UIWindow.setPivot")
     Between0and1(y, 3, "UIWindow.setPivot")
 
-    rawset(self, "pivot", restrictedTable{})
+    rawset(self, "pivot", restrictedTable{x, y})
 
     return self
   end
