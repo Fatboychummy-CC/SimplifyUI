@@ -125,9 +125,11 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     -- get position offset.
     local startX, startY = self:getLocalPosition()
 
+    -- determine maximums.
     local maxY = math.min(self.body.h, self.h)
     local maxX = math.min(self.body.w, self.w)
 
+    -- actually draw
     for y = 1, maxY do
       for x = 1, maxX do
         local col = self.body[y]
@@ -140,9 +142,7 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
       end
     end
 
-    self.parentTerm.setCursorPos(startX, startY)
-    self.parentTerm.blit("#", "0", "a")
-
+    -- draw all children
     for i = 1, #self.children do
       self.children[i]:draw()
     end
