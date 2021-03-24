@@ -53,12 +53,12 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     local ox, oy = uiObject:getSize()
     if not uiObject.parent then -- if root object
       local tx, ty = term.getSize()
-      return math.floor(tx * uiObject.anchor[1] + 0.5) - math.floor(ox * uiObject.pivot[1] + 0.5) + uiObject.x,
-             math.floor(ty * uiObject.anchor[2] + 0.5) - math.floor(oy * uiObject.pivot[2] + 0.5) + uiObject.y
+      return math.floor(tx * uiObject.anchor[1] + 0.5) - math.floor((ox - 1) * uiObject.pivot[1] + 0.5) + uiObject.x,
+             math.floor(ty * uiObject.anchor[2] + 0.5) - math.floor((oy - 1) * uiObject.pivot[2] + 0.5) + uiObject.y
     else -- NOT root object.
       local tx, ty = uiObject.parent:getSize()
-      return math.floor(tx * uiObject.anchor[1] + 0.5) - math.floor(ox * uiObject.pivot[1] + 0.5) + px + uiObject.x,
-             math.floor(ty * uiObject.anchor[2] + 0.5) - math.floor(oy * uiObject.pivot[2] + 0.5) + py + uiObject.y
+      return math.floor(tx * uiObject.anchor[1] + 0.5) - math.floor((ox - 1) * uiObject.pivot[1] + 0.5) + px + uiObject.x,
+             math.floor(ty * uiObject.anchor[2] + 0.5) - math.floor((oy - 1) * uiObject.pivot[2] + 0.5) + py + uiObject.y
     end
   end
 
@@ -83,6 +83,13 @@ function UIControl.new(parentTerm, x, y, w, h, name, parent)
     end
 
     return px, py
+  end
+
+  function mt.__index.getPivotPoint(self)
+    expect(1, self, "table")
+
+    local x, y = self:getLocalPosition()
+    return x + math.floor(self.pivot[1] * (self.w - 1) + 0.5), y + math.floor(self.pivot[2] * (self.h - 1) + 0.5)
   end
 
   function mt.__index.resize(self, w, h)
