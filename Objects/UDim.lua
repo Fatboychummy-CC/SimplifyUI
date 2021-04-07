@@ -25,9 +25,9 @@ local mt = {
 }
 
 --- Add two UDims.
--- @tparam {UDim} dim1 LHS
--- @tparam {UDim} dim2 RHS
--- @treturn {UDim} dim1 + dim2
+-- @tparam UDim dim1 LHS
+-- @tparam UDim dim2 RHS
+-- @treturn UDim dim1 + dim2
 function mt.__add(dim1, dim2)
   if not UDim.IsValid(dim1) then
     error("LHS is not a valid UDim.", 2)
@@ -39,9 +39,9 @@ function mt.__add(dim1, dim2)
 end
 
 --- Subtract a UDim from another UDim.
--- @tparam {UDim} dim1 LHS
--- @tparam {UDim} dim2 RHS
--- @treturn {UDim} dim1 - dim2
+-- @tparam UDim dim1 LHS
+-- @tparam UDim dim2 RHS
+-- @treturn UDim dim1 - dim2
 function mt.__sub(dim1, dim2)
   if not UDim.IsValid(dim1) then
     error("LHS is not a valid UDim.", 2)
@@ -53,9 +53,9 @@ function mt.__sub(dim1, dim2)
 end
 
 --- Create a new UDim.
--- @tparam {number} scale The scale of the UDim ([usually] between 0 and 1).
--- @tparam {number} offset The offset of the UDim (Integer).
--- @treturn {UDim} The new UDim.
+-- @tparam number scale The scale of the UDim ([usually] between 0 and 1).
+-- @tparam number offset The offset of the UDim (Integer).
+-- @treturn UDim The new UDim.
 function UDim.New(scale, offset)
   expect(1, scale, "number")
   expect(2, offset, "number")
@@ -65,7 +65,7 @@ end
 
 --- Check if the input is a valid UDim.
 -- @param dim The object you wish to test.
--- @treturn {boolean} true if the object is a UDim, false otherwise.
+-- @treturn bool true if the object is a UDim, false otherwise.
 function UDim.IsValid(dim)
   return type(dim) == "table" and dim._classname == "UDim"
 end

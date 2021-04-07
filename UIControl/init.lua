@@ -15,14 +15,14 @@ function UIControl.IsValid(t)
 end
 
 --- Create a new UIControl object.
--- @tparam parentTerm {table} The parent terminal this object should be drawn to.
--- @tparam name {string} The name of this object.
--- @tparam x {number, nil} The x offset of this object (Default 0).
--- @tparam y {number, nil} The y offset of this object (Default 0).
--- @tparam w {number, nil} The width offset of this object (Default 0).
--- @tparam h {number, nil} The height offset of this object (Default 0).
--- @tparam parent {UIControl, nil} The UI object this object is a child of (Default nil).
--- @treturn {UIControl} The UIControl object created.
+-- @tparam parentTerm table The parent terminal this object should be drawn to.
+-- @tparam name string The name of this object.
+-- @tparam[opt] x number The x offset of this object (Default 0).
+-- @tparam[opt] y number The y offset of this object (Default 0).
+-- @tparam[opt] w number The width offset of this object (Default 0).
+-- @tparam[opt] h number The height offset of this object (Default 0).
+-- @tparam[opt] parent UIControl The UI object this object is a child of (Default nil).
+-- @treturn UIControl The UIControl object created.
 function UIControl.new(parentTerm, name, x, y, w, h, parent)
   expect(1, parentTerm, "table")
   expect(2, name, "string")
@@ -124,8 +124,8 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- Reposition this UI object.
   -- It is recommended to use this rather than manually setting the position, as this method updates the UI object after the change.
-  -- @tparam {UDim2} udim2 The UDim2 used to replace the position.
-  -- @treturn {UIControl} self
+  -- @tparam UDim2 udim2 The UDim2 used to replace the position.
+  -- @treturn UIControl self
   function mt.__index.Reposition(self, udim2)
     expect(1, self, "table")
     expect(2, udim2, "table")
@@ -141,8 +141,8 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- Resize this UI object.
   -- It is recommended to use this rather than manually setting the size, as this method updates the UI object after the change.
-  -- @tparam {UDim2} udim2 The UDim2 used to replace the size.
-  -- @treturn {UIControl} self
+  -- @tparam UDim2 udim2 The UDim2 used to replace the size.
+  -- @treturn UIControl self
   function mt.__index.Resize(self, udim2)
     expect(1, self, "table")
     expect(2, udim2, "table")
@@ -158,7 +158,7 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- Draw this object, accounting for transparency (in a very poor way)
   -- Recommend using a framebuffer to reduce monitor draw calls.
-  -- @treturn {UIControl} self
+  -- @treturn UIControl self
   function mt.__index.Draw(self)
     expect(1, self, "table")
 
@@ -191,7 +191,7 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
   end
 
   --- Completely empties the body of this UI object.
-  -- @treturn {UIControl} self
+  -- @treturn UIControl self
   function mt.__index.Clear(self)
     expect(1, self, "table")
 
@@ -202,10 +202,10 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- Flood the background of the UI object with select blit info.
   -- Does not overwrite already written pixels.
-  -- @tparam {string} fg The paint-color-code to be used for the text color.
-  -- @tparam {string} bg The paint-color-code to be used for the background color.
-  -- @tparam {string, nil} c The character to be used (Default ' ' [space]).
-  -- @treturn {UIControl} self
+  -- @tparam string fg The paint-color-code to be used for the text color.
+  -- @tparam string bg The paint-color-code to be used for the background color.
+  -- @tparam[opt] string c The character to be used (Default ' ' [space]).
+  -- @treturn UIControl self
   function mt.__index.FloodBackground(self, fg, bg, c)
     expect(1, self, "table")
     expect(2, fg, "string")
@@ -243,8 +243,8 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- set this uiObject's parent.
   -- Setting parent to nil will cause the parent to be the terminal.
-  -- @tparam {UIControl, nil} parent The parent object to be assigned.
-  -- @treturn {UIControl} self
+  -- @tparam[opt] UIControl parent The parent object to be assigned.
+  -- @treturn UIControl self
   function mt.__index.SetParent(self, parent)
     -- check parent is valid uiobject
     if parent == nil then
@@ -278,8 +278,8 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- Calculate the actual size of this object.
   -- If you just wish to see the actual size without calculating it, use object.ActualSize
-  -- @treturn {number} Actual width.
-  -- @treturn {number} Actual height.
+  -- @treturn number Actual width.
+  -- @treturn number Actual height.
   function mt.__index.GetActualSize(self)
     expect(1, self, "table")
 
@@ -355,7 +355,7 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
 
   --- Search this object for a child named 'name'
   -- @tparam string name The name of the object to search for.
-  -- @treturn UIControl|nil The object found, or nil if not.
+  -- @treturn ?UIControl The object found, or nil if not.
   function mt.__index.FindFirstChildByName(self, name)
     expect(1, self, "table")
     expect(2, name, "string")
