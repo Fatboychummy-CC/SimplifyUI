@@ -8,6 +8,8 @@ local UIControl = {}
 local expect = require "cc.expect".expect
 local UDim, UDim2 = require "Objects.UDim", require "Objects.UDim2"
 
+--- Small check to determine if this is a valid UI object.
+-- @treturn bool If the object is a UI object or not.
 function UIControl.IsValid(t)
   return type(t) == "table" and t._isUIObject
 end
@@ -33,19 +35,29 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     error("Cannot assign parent to non-UIObject.", 2)
   end
 
-  local mt = {__index = {}}
+  local mt = {__index = {
+    _classname = "UIControl",
+    _isUIObject = true,
+  }}
   local deepmt = {__index = {}}
 
   local function restrictedTable(t)
     return setmetatable(t or {}, deepmt)
   end
 
+  -- @table uiObject
+  -- @within UIControl
+  -- @field Position The base position of this object before drawing.
+  -- @field Size The base size of this object before drawing.
+  -- @field AnchorPoint The location on this object that acts as the "centerpoint" of the object.
+  -- @field ActualPosition The actual position of this object when drawing.
+  -- @field ActualSize The actual size of this object when drawing.
+  -- @field Name The name of this object.
+  -- @field Body The drawn part of the object.
+  -- @field Parent The parent of this object, if any.
+  -- @field ParentTerm The parent terminal object this object will be drawn to.
+  -- @field Children A list of all children this ui object contains.
   local uiObject = setmetatable({
-    -- class info
-    _classname = "UIControl",
-    _name = name,
-    _isUIObject = true,
-
     -- positioning
     Position = UDim2.FromOffset(x or 0, y or 0),
     Size = UDim2.FromOffset(w or 0, h or 0),
@@ -57,6 +69,7 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     ActualSize = restrictedTable{W = w or 0, H = h or 0},
 
     -- object information
+    Name = name,
     Body = restrictedTable{W = 0, H = 0},
     Parent = parent,
     ParentTerm = parentTerm,
@@ -109,6 +122,10 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     rawset(self.ActualSize, "H", h)
   end
 
+  --- Reposition this UI object.
+  -- It is recommended to use this rather than manually setting the position, as this method updates the UI object after the change.
+  -- @tparam {UDim2} udim2 The UDim2 used to replace the position.
+  -- @treturn {UIControl} self
   function mt.__index.Reposition(self, udim2)
     expect(1, self, "table")
     expect(2, udim2, "table")
@@ -122,6 +139,10 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     return self
   end
 
+  --- Resize this UI object.
+  -- It is recommended to use this rather than manually setting the size, as this method updates the UI object after the change.
+  -- @tparam {UDim2} udim2 The UDim2 used to replace the size.
+  -- @treturn {UIControl} self
   function mt.__index.Resize(self, udim2)
     expect(1, self, "table")
     expect(2, udim2, "table")
@@ -135,54 +156,9 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     return self
   end
 
-  --- Get the actual size of this object.
-  --
-  function mt.__index.GetActualSize(self)
-    expect(1, self, "table")
-
-    -- collect "parent chain"
-    local current = self
-    local parentChain = {n = 1, self}
-    while current and current.Parent do
-      parentChain.n = parentChain.n + 1
-      parentChain[parentChain.n] = current.Parent
-      current = current.Parent
-    end
-
-    -- calculate offsets of parents.
-    local px, py = 0, 0 -- The topmost parent should not have a parent, so starting at 0, 0 should be fine.
-    for i = parentChain.n, 1, -1 do
-      px, py = getSizeFromParent(parentChain[i], px, py)
-    end
-
-    return px, py
-  end
-
-  -- Recursive function that traverses parents until parent is nil. Then,
-  -- collects all the offsets and sizes to calculate this object's position.
-  function mt.__index.GetActualPosition(self)
-    expect(1, self, "table")
-
-    -- collect "parent chain"
-    local current = self
-    local parentChain = {n = 1, self}
-    while current and current.Parent do
-      parentChain.n = parentChain.n + 1
-      parentChain[parentChain.n] = current.Parent
-      current = current.Parent
-    end
-
-    -- calculate offsets of parents.
-    local px, py = 0, 0 -- The topmost parent should not have a parent, so starting at 0, 0 should be fine.
-    for i = parentChain.n, 1, -1 do
-      px, py = getPositionFromParent(parentChain[i], px, py)
-    end
-
-    return px, py
-  end
-
-  -- Draw this object, accounting for transparency (in a very poor way)
+  --- Draw this object, accounting for transparency (in a very poor way)
   -- Recommend using a framebuffer to reduce monitor draw calls.
+  -- @treturn {UIControl} self
   function mt.__index.Draw(self)
     expect(1, self, "table")
 
@@ -214,6 +190,8 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     return self
   end
 
+  --- Completely empties the body of this UI object.
+  -- @treturn {UIControl} self
   function mt.__index.Clear(self)
     expect(1, self, "table")
 
@@ -222,12 +200,18 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     return self
   end
 
-  function mt.__index.FloodBackground(self, c, fg, bg)
+  --- Flood the background of the UI object with select blit info.
+  -- Does not overwrite already written pixels.
+  -- @tparam {string} fg The paint-color-code to be used for the text color.
+  -- @tparam {string} bg The paint-color-code to be used for the background color.
+  -- @tparam {string, nil} c The character to be used (Default ' ' [space]).
+  -- @treturn {UIControl} self
+  function mt.__index.FloodBackground(self, fg, bg, c)
     expect(1, self, "table")
-    expect(2, c, "string")
-    expect(3, fg, "string")
-    expect(4, bg, "string")
-    c, fg, bg = c:sub(1, 1), fg:sub(1, 1), bg:sub(1, 1)
+    expect(2, fg, "string")
+    expect(3, bg, "string")
+    expect(4, c, "string", "nil")
+    c, fg, bg = c and c:sub(1, 1) or ' ', fg:sub(1, 1), bg:sub(1, 1)
 
     for y = 1, self.ActualSize.H do
       for x = 1, self.ActualSize.W do
@@ -241,9 +225,12 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     end
     rawset(self.Body, 'W', self.ActualSize.W)
     rawset(self.Body, 'H', self.ActualSize.H)
+
+    return self
   end
 
-  -- Check for loops when assigning a new parent.
+  --- Validate that there are no loops when assigning a new value to the .Parent value
+  -- @local
   local function validateNoLoops(uiObject, parent)
     local current = parent
     while current and current.Parent do
@@ -254,7 +241,10 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     end
   end
 
-  -- set this uiObject's parent.
+  --- set this uiObject's parent.
+  -- Setting parent to nil will cause the parent to be the terminal.
+  -- @tparam {UIControl, nil} parent The parent object to be assigned.
+  -- @treturn {UIControl} self
   function mt.__index.SetParent(self, parent)
     -- check parent is valid uiobject
     if parent == nil then
@@ -286,24 +276,92 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     return self
   end
 
-  -- get the size of this object.
-  function mt.__index.GetSize()
-    return w, h
+  --- Calculate the actual size of this object.
+  -- If you just wish to see the actual size without calculating it, use object.ActualSize
+  -- @treturn {number} Actual width.
+  -- @treturn {number} Actual height.
+  function mt.__index.GetActualSize(self)
+    expect(1, self, "table")
+
+    -- collect "parent chain"
+    local current = self
+    local parentChain = {n = 1, self}
+    while current and current.Parent do
+      parentChain.n = parentChain.n + 1
+      parentChain[parentChain.n] = current.Parent
+      current = current.Parent
+    end
+
+    -- calculate offsets of parents.
+    local px, py = 0, 0 -- The topmost parent should not have a parent, so starting at 0, 0 should be fine.
+    for i = parentChain.n, 1, -1 do
+      px, py = getSizeFromParent(parentChain[i], px, py)
+    end
+
+    return px, py
   end
 
-  -- Return all the children.
+  --- Calculate the actual position of this object.
+  -- If you just wish to see the actual position without calculating it, use object.ActualPosition
+  -- @treturn number Actual x position, in relation to the terminal.
+  -- @treturn number Actual y position, in relation to the terminal.
+  function mt.__index.GetActualPosition(self)
+    expect(1, self, "table")
+
+    -- collect "parent chain"
+    local current = self
+    local parentChain = {n = 1, self}
+    while current and current.Parent do
+      parentChain.n = parentChain.n + 1
+      parentChain[parentChain.n] = current.Parent
+      current = current.Parent
+    end
+
+    -- calculate offsets of parents.
+    local px, py = 0, 0 -- The topmost parent should not have a parent, so starting at 0, 0 should be fine.
+    for i = parentChain.n, 1, -1 do
+      px, py = getPositionFromParent(parentChain[i], px, py)
+    end
+
+    return px, py
+  end
+
+  --- Get the base size of this object.
+  -- @treturn UDim The UDim corresponding to the X axis.
+  -- @treturn UDim The UDim corresponding to the Y axis.
+  function mt.__index.GetSize()
+    return self.Size.X, self.Size.Y
+  end
+
+  --- Get the base position of this object.
+  -- @treturn UDim The UDim corresponding to the X axis.
+  -- @treturn UDim The UDim corresponding to the Y axis.
+  function mt.__index.GetPosition()
+    return self.Position.X, self.Position.Y
+  end
+
+  --- Get the name of this object.
+  -- @treturn string The object's name.
+  function mt.__index.GetName()
+    return self.Name
+  end
+
+  --- Get this object's children.
+  -- @treturn {UIControl, ...} This object's children.
   function mt.__index.GetChildren(self)
     expect(1, self, "table")
     return self.Children
   end
 
-  -- Return the first child with name 'name'
+  --- Search this object for a child named 'name'
+  -- @tparam string name The name of the object to search for.
+  -- @treturn UIControl|nil The object found, or nil if not.
   function mt.__index.FindFirstChildByName(self, name)
     expect(1, self, "table")
     expect(2, name, "string")
 
     for i = 1, #self.Children do
-      if self.Children[i]._name == name then
+      if self.Children[i].Name == name then
         return self.Children[i]
       end
     end
@@ -319,7 +377,7 @@ function UIControl.new(parentTerm, name, x, y, w, h, parent)
     return string.format(
       "%s (%s): X:%d Y:%d W:%d H:%d AX:%d AY:%d",
       v._classname,
-      v._name,
+      v.Name,
       v.x,
       v.y,
       v.w,
