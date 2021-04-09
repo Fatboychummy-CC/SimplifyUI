@@ -23,7 +23,7 @@ end
 -- @tparam[opt] h number The height offset of this object (Default 0).
 -- @tparam[opt] parent UIControl The UI object this object is a child of (Default nil).
 -- @treturn UIControl The UIControl object created.
-function UIControl.new(parentTerm, name, x, y, w, h, parent)
+function UIControl.New(parentTerm, name, x, y, w, h, parent)
   expect(1, parentTerm, "table")
   expect(2, name, "string")
   expect(3, x, "number", "nil")
