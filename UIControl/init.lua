@@ -71,7 +71,7 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
     -- object information
     Name = name,
     Body = restrictedTable{W = 0, H = 0},
-    Parent = parent,
+    Parent = nil,
     ParentTerm = parentTerm,
     Children = restrictedTable{},
   }, mt)
@@ -94,8 +94,8 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
       return math.floor(uiObject.Position.X.Offset + uiObject.Position.X.Scale * tx - (uiObject.AnchorPoint.X.Offset + uiObject.AnchorPoint.X.Scale * uiObject.ActualSize.W) + 0.5),
              math.floor(uiObject.Position.Y.Offset + uiObject.Position.Y.Scale * ty - (uiObject.AnchorPoint.Y.Offset + uiObject.AnchorPoint.Y.Scale * uiObject.ActualSize.H) + 0.5)
     else -- NOT root object.
-      return math.floor(px + uiObject.Position.X.Offset + uiObject.Position.X.Scale * px - (uiObject.AnchorPoint.X.Offset + uiObject.AnchorPoint.X.Scale * uiObject.ActualSize.W) + 0.5),
-             math.floor(py + uiObject.Position.Y.Offset + uiObject.Position.Y.Scale * py - (uiObject.AnchorPoint.Y.Offset + uiObject.AnchorPoint.Y.Scale * uiObject.ActualSize.H) + 0.5)
+      return math.floor(px + uiObject.Position.X.Offset + uiObject.Position.X.Scale * uiObject.Parent.ActualSize.W - (uiObject.AnchorPoint.X.Offset + uiObject.AnchorPoint.X.Scale * uiObject.ActualSize.W) + 0.5),
+             math.floor(py + uiObject.Position.Y.Offset + uiObject.Position.Y.Scale * uiObject.Parent.ActualSize.H - (uiObject.AnchorPoint.Y.Offset + uiObject.AnchorPoint.Y.Scale * uiObject.ActualSize.H) + 0.5)
     end
   end
   local function getSizeFromParent(uiObject, px, py)
@@ -114,12 +114,17 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
   --- Update the UIControl object.
   -- Iterates through all the things that need to change, (position, size, etc) whenever specific events occur.
   function mt.__index._update(self)
-    local x, y = self:GetActualPosition()
     local w, h = self:GetActualSize()
+    local x, y = self:GetActualPosition()
     rawset(self.ActualPosition, "X", x)
     rawset(self.ActualPosition, "Y", y)
     rawset(self.ActualSize, "W", w)
     rawset(self.ActualSize, "H", h)
+
+    -- Update children!
+    for i = 1, #self.Children do
+      self.Children[i]:_update()
+    end
   end
 
   --- Reposition this UI object.
@@ -268,7 +273,7 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
     -- add to new parent, if needed.
     for i = 1, #parent.Children do
       if parent.Children[i] == self then
-        return
+        return self
       end
     end
     table.insert(parent.Children, self)
@@ -375,19 +380,16 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
   function mt.__tostring(v)
     local x, y = v:GetActualPosition()
     return string.format(
-      "%s (%s): X:%d Y:%d W:%d H:%d AX:%d AY:%d",
+      "%s (%s)",
       v._classname,
-      v.Name,
-      v.x,
-      v.y,
-      v.w,
-      v.h,
-      x,
-      y
+      v.Name
     )
   end
 
+  -- Update final stuff
+  uiObject:SetParent(parent)
   uiObject:_update()
+
   return uiObject
 end
 
