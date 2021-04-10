@@ -21,6 +21,9 @@ local mt = {
     elseif k == "Offset" then
       rawset(self, k, v)
     else main.writePrevent(k) end
+  end,
+  __tostring = function(self)
+    return string.format("UDim: S=%.2f|O=%d", self.Scale, self.Offset)
   end
 }
 

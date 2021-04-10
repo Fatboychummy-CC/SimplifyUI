@@ -24,6 +24,9 @@ local mt = {
     else
       main.writePrevent(k)
     end
+  end,
+  __tostring = function(self)
+    return string.format("UDim2: || X=%s || Y=%s ||", tostring(self.X), tostring(self.Y))
   end
 }
 
