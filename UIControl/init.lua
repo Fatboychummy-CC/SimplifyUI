@@ -234,6 +234,19 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
     return self
   end
 
+  function mt.__index.SetAnchorPoint(self, anchor)
+    expect(1, anchor, "table")
+    if UDim2.IsValid(anchor) then
+      rawset(self, "AnchorPoint", anchor)
+    else
+      error("Expected valid UDim2.", 2)
+    end
+
+    self:_update()
+
+    return self
+  end
+
   --- Validate that there are no loops when assigning a new value to the .Parent value
   -- @local
   local function validateNoLoops(uiObject, parent)
@@ -373,6 +386,23 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
 
     return nil
   end
+
+  --- Delete this object and all its children.
+  function mt.__index.Remove(self)
+    -- Delete all children
+    for i = 1, #self.Children do
+      self.Children[i]:Remove()
+    end
+
+    -- Delete everything inside this object
+    for k in pairs(self) do
+      rawset(self, k, nil)
+    end
+
+    -- Remove metatable reference
+    setmetatable(self, nil)
+  end
+
 
   mt.__newindex = blockNewIndex
 
