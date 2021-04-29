@@ -1,12 +1,14 @@
 --- UIControl is what every uiobject inherits from.
 -- @author fatboychummy
 -- @type UIControl
--- @alias mt
 
 
 local UIControl = {}
 local expect = require "cc.expect".expect
 local UDim, UDim2 = require "Objects.UDim", require "Objects.UDim2"
+local List = require "Objects.List"
+local Eventify = require "Objects.Eventify"
+local lastid = 0
 
 --- Small check to determine if this is a valid UI object.
 -- @treturn bool If the object is a UI object or not.
@@ -35,15 +37,69 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
     error("Cannot assign parent to non-UIObject.", 2)
   end
 
-  local mt = {__index = {
-    _classname = "UIControl",
-    _isUIObject = true,
-  }}
   local deepmt = {__index = {}}
 
   local function restrictedTable(t)
     return setmetatable(t or {}, deepmt)
   end
+
+  lastid = lastid + 1
+  local mt = {
+    __index = {
+      -- Ckass info
+      _classname = "UIControl",
+      _isUIObject = true,
+      _id = lastid,
+
+      -- positioning
+      Position = UDim2.FromOffset(x or 0, y or 0),
+      Size = UDim2.FromOffset(w or 0, h or 0),
+      AnchorPoint = UDim2.New(0, 0, 0, 0),
+
+      -- "local" positioning: Position the object will actually be drawn at
+      -- determined in _update function.
+      ActualPosition = restrictedTable{X = x or 0, Y = y or 0},
+      ActualSize = restrictedTable{W = w or 0, H = h or 0},
+
+      -- object information
+      Name = name,
+      Body = restrictedTable{W = 0, H = 0},
+      Parent = nil,
+      ParentTerm = parentTerm,
+      Children = restrictedTable{},
+      AllowedWriteFields = {
+        Position = function(self, value)
+          self:Reposition(value)
+        end,
+        Size = function(self, value)
+          self:Resize(value)
+        end,
+        AnchorPoint = function(self, value)
+          self:SetAnchorPoint(value)
+        end,
+        Name = function(self, value)
+          self:SetName(value)
+        end,
+        Parent = function(self, value)
+
+        end,
+        ParentTerm = function(self, value)
+
+        end,
+        Children = function(self, value)
+
+        end
+      }
+    },
+    __newindex = function(self, k, v)
+      local allowed = self.AllowedWriteFields
+      if allowed[k] then
+        allowed[k](self, v)
+        return
+      end
+      error(string.format("Cannot write to read-only property '%s'.", k))
+    end
+  }
 
   -- @table uiObject
   -- @within UIControl
@@ -57,24 +113,7 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
   -- @field Parent The parent of this object, if any.
   -- @field ParentTerm The parent terminal object this object will be drawn to.
   -- @field Children A list of all children this ui object contains.
-  local uiObject = setmetatable({
-    -- positioning
-    Position = UDim2.FromOffset(x or 0, y or 0),
-    Size = UDim2.FromOffset(w or 0, h or 0),
-    AnchorPoint = UDim2.New(0, 0, 0, 0),
-
-    -- "local" positioning: Position the object will actually be drawn at
-    -- determined in _update function.
-    ActualPosition = restrictedTable{X = x or 0, Y = y or 0},
-    ActualSize = restrictedTable{W = w or 0, H = h or 0},
-
-    -- object information
-    Name = name,
-    Body = restrictedTable{W = 0, H = 0},
-    Parent = nil,
-    ParentTerm = parentTerm,
-    Children = restrictedTable{},
-  }, mt)
+  local uiObject = setmetatable({}, mt)
 
   local function blockNewIndex()
     error("Assigning manually is restricted. Use setter methods instead.", 2)
@@ -113,13 +152,16 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
 
   --- Update the UIControl object.
   -- Iterates through all the things that need to change, (position, size, etc) whenever specific events occur.
-  function mt.__index._update(self)
+  function mt.__index._update(self, name)
+    if name == "ActualPosition" or name == "ActualSize" then return end
     local w, h = self:GetActualSize()
     local x, y = self:GetActualPosition()
-    rawset(self.ActualPosition, "X", x)
-    rawset(self.ActualPosition, "Y", y)
-    rawset(self.ActualSize, "W", w)
-    rawset(self.ActualSize, "H", h)
+    rawset(mt.__index.ActualPosition, "X", x)
+    rawset(mt.__index.ActualPosition, "Y", y)
+    self.PropertyChangedEvent:Fire(self, "ActualPosition", self.ActualPosition)
+    rawset(mt.__index.ActualSize, "W", w)
+    rawset(mt.__index.ActualSize, "H", h)
+    self.PropertyChangedEvent:Fire(self, "ActualSize", self.ActualSize)
 
     -- Update children!
     for i = 1, #self.Children do
@@ -138,8 +180,8 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
       error("Invalid argument #2: Expected UDim2.", 2)
     end
 
-    rawset(self, "Position", udim2)
-    self:_update()
+    mt.__index.Position = udim2
+    self.PropertyChangedEvent:Fire(self, "Position", udim2)
 
     return self
   end
@@ -155,8 +197,9 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
       error("Invalid argument #2: Expected UDim2.", 2)
     end
 
-    rawset(self, "Size", udim2)
-    self:_update()
+    mt.__index.Size = udim2
+
+    self.PropertyChangedEvent:Fire(self, "Size", udim2)
 
     return self
   end
@@ -218,31 +261,37 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
     expect(4, c, "string", "nil")
     c, fg, bg = c and c:sub(1, 1) or ' ', fg:sub(1, 1), bg:sub(1, 1)
 
+
     for y = 1, self.ActualSize.H do
       for x = 1, self.ActualSize.W do
         if not self.Body[y] then
-          rawset(self.Body, y, restrictedTable{})
+          rawset(mt.__index.Body, y, restrictedTable{})
         end
         if not self.Body[y][x] then
-          rawset(self.Body[y], x, restrictedTable{C = c, FG = fg, BG = bg})
+          rawset(mt.__index.Body[y], x, restrictedTable{C = c, FG = fg, BG = bg})
         end
       end
     end
-    rawset(self.Body, 'W', self.ActualSize.W)
-    rawset(self.Body, 'H', self.ActualSize.H)
+    rawset(mt.__index.Body, "W", self.ActualSize.W)
+    rawset(mt.__index.Body, 'H', self.ActualSize.H)
 
     return self
+  end
+
+  function mt.__index.SetName(self, name)
+    expect(1, name, "string")
+    mt.__index.Name = name
   end
 
   function mt.__index.SetAnchorPoint(self, anchor)
     expect(1, anchor, "table")
     if UDim2.IsValid(anchor) then
-      rawset(self, "AnchorPoint", anchor)
+      mt.__index.AnchorPoint = anchor
     else
       error("Expected valid UDim2.", 2)
     end
 
-    self:_update()
+    self.PropertyChangedEvent:Fire(self, "AnchorPoint", anchor)
 
     return self
   end
@@ -289,7 +338,9 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
         return self
       end
     end
-    table.insert(parent.Children, self)
+    table.insert(parent.Children, self) -- @TODO Add uiObject.AddChild(uiObject)
+
+    self.PropertyChangedEvent:Fire(self, "Parent", parent)
 
     return self
   end
@@ -401,7 +452,17 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
 
     -- Remove metatable reference
     setmetatable(self, nil)
+
+    self.RemovedEvent:Fire()
   end
+
+  -- Events
+  local formatString = string.format("%%s_%s%%d", proxy._classname)
+  local function doFormatting(eventName)
+    return string.format(formatString, eventName, proxy._id)
+  end
+  PropertyChangedEvent = Eventify(doFormatting("PropertyChanged"))
+  RemovedEvent = Eventify(doFormatting("Removed"))
 
 
   mt.__newindex = blockNewIndex
@@ -417,8 +478,9 @@ function UIControl.New(parentTerm, name, x, y, w, h, parent)
   end
 
   -- Update final stuff
+  mt.__index.PropertyChangedEvent:Connect(uiObject._update)
+
   uiObject:SetParent(parent)
-  uiObject:_update()
 
   return uiObject
 end
