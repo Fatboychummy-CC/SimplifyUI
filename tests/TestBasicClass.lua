@@ -29,7 +29,7 @@ cctest.newSuite "TestBasicClass"
       local x = BasicClass.New("x", {}, {})
       EXPECT_EVENT(
         x.Remove,
-        x.RemovedEvent.Name,
+        x.RemovingEvent.Name,
         0.25,
         x
       )
