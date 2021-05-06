@@ -40,3 +40,25 @@ cctest.newSuite "UDimTests"
     EXPECT_UEQ(u, u3)
     EXPECT_UEQ(u2, u3)
   end)
+  "IncorrectTypes" (function()
+    local u = UDim.New(0, 0)
+
+    EXPECT_THROW_ANY_ERROR(function()
+      u.Scale = "Hello"
+    end)
+    EXPECT_UEQ(u.Scale, "Hello")
+    EXPECT_THROW_ANY_ERROR(function()
+      u.Offset = "Hello"
+    end)
+    EXPECT_UEQ(u.Offset, "Hello")
+  end)
+  "CorrectTypes" (function()
+    local u = UDim.New(0, 0)
+
+    EXPECT_NO_THROW(function()
+      u.Scale = 0.5
+      u.Offset = 32
+    end)
+    EXPECT_EQ(u.Scale, 0.5)
+    EXPECT_EQ(u.Offset, 32)
+  end)
