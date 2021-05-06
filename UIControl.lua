@@ -11,7 +11,7 @@ local UIControl = BasicClass.New(
   "UIControl",
   {
     IsValid = function(object)
-      return type(t) == "table" and object.GetProxy and object:GetProxy()._isUIObject
+      return type(object) == "table" and object.GetProxy and object:GetProxy()._isUIObject
     end
   },
   {},
