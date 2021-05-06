@@ -64,3 +64,40 @@ cctest.newSuite "UDim2Tests"
 
     EXPECT_UEQ(u4, u5)
   end)
+  "IncorrectTypes" (function()
+    local u = UDim2.New(0, 0, 0, 0)
+    EXPECT_THROW_ANY_ERROR(function()
+      u.X = 32
+    end)
+    EXPECT_UEQ(u.X, 32)
+    EXPECT_THROW_ANY_ERROR(function()
+      u.Y = 32
+    end)
+    EXPECT_UEQ(u.Y, 32)
+  end)
+  "CorrectTypes" (function()
+    local u = UDim2.New(0, 0, 0, 0)
+    local comparator = UDim.New(1, 1)
+    EXPECT_NO_THROW(function()
+      u.X = comparator
+    end)
+    EXPECT_EQ(u.X, comparator)
+    EXPECT_NO_THROW(function()
+      u.Y = comparator
+    end)
+    EXPECT_EQ(u.Y, comparator)
+  end)
+  "FromScaleConstructor" (function()
+    local u
+    local xScale, yScale = 0.1, 0.2
+    EXPECT_NO_THROW(function() u = UDim2.FromScale(xScale, yScale) end)
+    EXPECT_EQ(u.X.Scale, xScale)
+    EXPECT_EQ(u.Y.Scale, yScale)
+  end)
+  "FromOffsetConstructor" (function()
+    local u
+    local xScale, yScale = 25, 481
+    EXPECT_NO_THROW(function() u = UDim2.FromOffset(xScale, yScale) end)
+    EXPECT_EQ(u.X.Offset, xScale)
+    EXPECT_EQ(u.Y.Offset, yScale)
+  end)
