@@ -39,11 +39,6 @@ UIControl:New(function(parentTerm, name, x, y, w, h, parent)
   local obj = BasicClass.New(
     "UIControl",
     {
-      Position = UDim2.FromOffset(x, y),
-      Size = UDim2.FromOffset(w, h),
-      AnchorPoint = UDim2.New(0, 0, 0, 0),
-
-      -- temporary variables that will
       ActualPosition = UDim2.FromOffset(x, y),
       ActualSize = UDim2.FromOffset(w, h),
       Children = List.New(),
@@ -51,11 +46,50 @@ UIControl:New(function(parentTerm, name, x, y, w, h, parent)
     {
       Parent = nil,
       Name = name,
-      ParentTerm = parentTerm
+      ParentTerm = parentTerm,
+      Position = UDim2.FromOffset(x, y),
+      Size = UDim2.FromOffset(w, h),
+      AnchorPoint = UDim2.New(0, 0, 0, 0),
     }
   )
+
+  obj:SetPropertyChangedHandler(function(self, propertyName, newValue)
+    if propertyName == "Parent" then
+      if UIControl.IsValid(newValue) then
+        return true
+      end
+      return false, {"UIControl"}, true
+    elseif propertyName == "Name" then
+      if type(newValue) == "string" then
+        return true
+      end
+      return false, {"string"}, false
+    elseif propertyName == "ParentTerm" then
+      local old = term.current()
+      local ok = pcall(function()
+        old = term.redirect(newValue)
+        term.getTextColor()
+      end)
+      term.redirect(old)
+
+      if ok then
+        return true
+      end
+      return false, {"Term"}, true
+    elseif propertyName == "Position" or propertyName == "Size" or propertyName == "AnchorPoint" then
+      if UDim2.IsValid(newValue) then
+        return true
+      end
+      return false, {"UDim2"}, true
+    end
+    return true
+  end)
 
   local proxy = obj:GetProxy()
   proxy.Body = {W = 0, H = 0}
   proxy._isUIObject = true
+
+  return obj
 end)
+
+return UIControl
