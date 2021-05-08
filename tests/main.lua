@@ -7,5 +7,6 @@ require "TestBasicClass"
 require "TestEnum"
 require "TestUDim"
 require "TestUDim2"
+require "TestUIControl"
 
 cctest.runAllTests()
