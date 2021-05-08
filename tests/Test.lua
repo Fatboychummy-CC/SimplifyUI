@@ -69,6 +69,11 @@ function testmt.__index:Run(injectedEnv)
 
   checkpoint()
 
+  local x, y = term.getCursorPos()
+  local w = window.create(term.current(), x, y, 1, 1)
+
+  local old = term.redirect(w)
+
   parallel.waitForAny(
     function()
       while true do
@@ -88,6 +93,9 @@ function testmt.__index:Run(injectedEnv)
       end
     end
   )
+
+  term.redirect(old)
+  term.setCursorPos(x, y)
 
   for k in pairs(wrapperInjection) do
     _ENV[k] = nil
