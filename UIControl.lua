@@ -7,12 +7,14 @@ local BasicClass = require "Objects.BasicClass"
 local List = require "Objects.List"
 local UDim, UDim2 = require "Objects.UDim", require "Objects.UDim2"
 
-local UIControl = BasicClass.New(
+local UIControl
+UIControl = BasicClass.New(
   "UIControl",
   {
     IsValid = function(object)
-      return type(object) == "table" and object.GetProxy and object:GetProxy()._isUIObject
-    end
+      return (object == UIControl.NULL_UI) or (type(object) == "table" and object.GetProxy and object:GetProxy()._isUIObject)
+    end,
+    NULL_UI = {}
   },
   {},
   true
@@ -44,7 +46,7 @@ UIControl:New(function(parentTerm, name, x, y, w, h, parent)
       Children = List.New(),
     },
     {
-      Parent = nil,
+      Parent = UIControl.NULL_UI,
       Name = name,
       ParentTerm = parentTerm,
       Position = UDim2.FromOffset(x, y),
