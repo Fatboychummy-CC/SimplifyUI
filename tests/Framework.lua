@@ -74,12 +74,12 @@ local function finishTest(t)
   print()
   if t.status == Test.STATUS.FAIL then
     print("Test failed:")
-    printError(string.format("  %s", t.reason))
+    printError(string.format("  %s", table.concat(t.reason, "\n\n  ")))
     print()
     return
   elseif t.status == Test.STATUS.ERROR then
     print("Test failed: Error was thrown in test body.")
-    printError(string.format("  %s", t.error))
+    printError(string.format("  %s", table.concat(t.error, "\n\n  ")))
     print()
     return
   end

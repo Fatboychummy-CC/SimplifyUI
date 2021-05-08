@@ -14,11 +14,11 @@ local test = {
 local testmt = {__index = {}}
 function testmt.__index:Fail(reason)
   self.status = test.STATUS.FAIL
-  self.reason = reason
+  table.insert(self.reason, reason)
 end
 function testmt.__index:Error(reason)
   self.status = test.STATUS.ERROR
-  self.error = reason
+  table.insert(self.error, reason)
 end
 function testmt.__index:Ok()
   self.status = test.STATUS.OK
@@ -102,8 +102,8 @@ function test.new(f, name, suite)
   local obj = {
     name = name,
     suite = suite,
-    error = "",
-    reason = "",
+    error = {},
+    reason = {},
     status = test.STATUS.LOADING,
     func = f,
     running = false
