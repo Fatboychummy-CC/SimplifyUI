@@ -22,8 +22,23 @@ UIControl = BasicClass.New(
 
 local UIControlProxy = UIControl:GetProxy()
 
+
+local function isTermObject(v)
+  local old = term.current()
+  local ok = pcall(function()
+    old = term.redirect(v)
+    term.getTextColor()
+  end)
+  term.redirect(old)
+
+  return ok
+end
+
 UIControl:New(function(parentTerm, name, x, y, w, h, parent)
   expect(1, parentTerm, "table")
+  if not isTermObject(parentTerm) then
+    error("Bad argument #1 to 'New': Expected Terminal Object, got " .. type(parentTerm) ..".", 1)
+  end
   expect(2, name, "string")
   expect(3, x, "number", "nil")
   x = x or 0
@@ -67,14 +82,7 @@ UIControl:New(function(parentTerm, name, x, y, w, h, parent)
       end
       return false, {"string"}, false
     elseif propertyName == "ParentTerm" then
-      local old = term.current()
-      local ok = pcall(function()
-        old = term.redirect(newValue)
-        term.getTextColor()
-      end)
-      term.redirect(old)
-
-      if ok then
+      if isTermObject(newValue) then
         return true
       end
       return false, {"Term"}, true
