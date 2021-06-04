@@ -1,3 +1,23 @@
+
+-- Calculate the path to self for module requiring.
+local modulesPath = ...
+
+-- loop backwards through module path string.
+for i = #modulesPath, 1, -1 do
+  -- if we find a dot, remove the end of the string up until the dot.
+  if modulesPath:sub(i, i) == '.' then
+    modulesPath = modulesPath:sub(1, i)
+    break
+  end
+
+  -- if i is one, we've gone all the way through and haven't found a dot. Add a dot to the end of it.
+  if i == 1 then
+    modulesPath = modulesPath .. '.'
+  end
+end
+
+
+
 local module = {
   loaded = {},
   tests = {},
@@ -5,8 +25,8 @@ local module = {
 
 local expect = require "cc.expect".expect
 local strings = require "cc.strings"
-local Expectations = require "Expectations"
-local Test = require "Test"
+local Expectations = require(modulesPath .. "Expectations")
+local Test = require(modulesPath .. "Test")
 local toInject = {}
 
 -- This functions builds the info line for the current test, ie:
