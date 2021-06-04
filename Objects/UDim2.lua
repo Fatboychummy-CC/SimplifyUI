@@ -116,8 +116,9 @@ New = function(xScale, xOffset, yScale, yOffset)
   })
   local proxy = obj:GetProxy()
   obj:InjectMT(mtInject)
-  obj:SetPropertyChangedHandler(function(self, propertyName, newValue)
-    if UDim.IsValid(newValue) then
+  obj:SetPrePropertyChangedHandler(function(self, propertyName, newValue)
+    if UDim.IsValid(newValue) and (propertyName == "X" or propertyName == "Y") then
+      
       return true
     end
 

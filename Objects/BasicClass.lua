@@ -4,13 +4,10 @@
 
 local expect = require "cc.expect".expect
 local Eventify = require "Objects.Eventify"
-if not _G._BasicClassStorage then
-  _G._BasicClassStorage = {
-    LastID = 0
-  }
-end
+local lastID = 0
+
 local function incLastID()
-  _G._BasicClassStorage.LastID = _G._BasicClassStorage.LastID + 1
+  lastID = lastID + 1
 end
 
 local coreLuaTypes = {
@@ -110,8 +107,9 @@ function mod.New(classname, readOnlyProperties, writeableProperties, isConstruct
   local obj = {} -- The object to be returned
   local proxy = { -- Proxy object that holds all the items.
     _classname = classname,
-    _id = _BasicClassStorage.LastID,
-    _propertyChangedHandler = function() return true, "", false end,
+    _id = lastID,
+    _prePropertyChangedHandler = function() return true, false, false end,
+    _postPropertyChangedHandler = function() end,
     writeable = {},
     __newindex = function() end,
     __index = function() end
@@ -176,20 +174,25 @@ function mod.New(classname, readOnlyProperties, writeableProperties, isConstruct
   }
   -- newindex metamethod: Block writing to the readOnly portion.
   function mt.__newindex(self, k, v)
-    local ok, types, isClassTypes = proxy._propertyChangedHandler(self, k, v)
-    if not ok then
+    local ok, types, isClassTypes
+    local data = proxy._prePropertyChangedHandler(self, k, v)
+    if not data.ok then
       local _type, isClassType = mod.CheckType(v)
-      mod.AssignmentError(k, _type, types, -2, isClassType, isClassTypes)
+      mod.AssignmentError(k, _type, data.expect, -2)
     end
-
-    if not proxy.writeable[k] then
-      if proxy.__newindex(k, v) then
-        return
+    if data.ok and not data.handled then
+      if not proxy.writeable[k] then
+        if proxy.__newindex(k, v) then
+          return
+        end
+        error(string.format("Cannot write to read-only (or non-existant) key '%s'.", k), 2)
       end
-      error(string.format("Cannot write to read-only (or non-existant) key '%s'.", k), 2)
+
+      proxy.writeable[k] = v
     end
 
-    proxy.writeable[k] = v
+    proxy._postPropertyChangedHandler(self, k, v)
+
     self.PropertyChangedEvent:Fire(self, k, v)
   end
 
@@ -203,7 +206,7 @@ function mod.New(classname, readOnlyProperties, writeableProperties, isConstruct
 
   if isConstructor then
     function obj:New(func)
-      proxy.readOnly.New = func
+      proxy.readOnly.New = function(...) incLastID() return func(...) end
       rawset(self, "New", nil)
     end
   end
@@ -229,11 +232,54 @@ function mod.New(classname, readOnlyProperties, writeableProperties, isConstruct
     rawset(self, "InjectMT", nil)
   end
 
-  function obj:SetPropertyChangedHandler(f)
+  function obj:SetPrePropertyChangedHandler(f)
     expect(2, f, "function")
-    proxy._propertyChangedHandler = f
+
+    -- _prePropertyChangedHandler has same inputs as _postPropertyChangedHandler.
+    -- _prePropertyChangedHandler expects the following return as a table:
+    --[[
+      {
+        ok      = true/false,                 -- If the operation is ok to continue.
+        expect  = {"typename", "classname"},  -- The expected lua types or class types (one or the other).
+        handled = true/false                  -- If the operation was handled internally by the class (ie: don't perform the swap)
+      }
+    ]]
+    proxy._prePropertyChangedHandler = f
 
     rawset(self, "SetPropertyChangedHandler", nil)
+  end
+
+  local connectionHandler = {}
+  function obj:SetPostPropertyChangedHandler(f)
+    expect(2, f, "function")
+    proxy._postPropertyChangedHandler = function(obj, name, val)
+      if connectionHandler[name] then
+        connectionHandler[name]:Update()
+      end
+      return f(obj, name, val)
+    end
+
+    rawset(self, "SetPostPropertyChangedHandler", nil)
+  end
+
+  function obj:RegisterConnection(name, func)
+    connectionHandler[name] = {}
+    if obj[name].PropertyChangedEvent then
+      connectionHandler[name].connection = obj[name].PropertyChangedEvent:Connect(function()
+        obj.PropertyChangedEvent:Fire(obj, name, obj[name])
+      end)
+    end
+    connectionHandler[name].Update = function(self)
+      self.connection:Disconnect()
+      if obj[name].PropertyChangedEvent then
+        print("Updated handler for", name)
+        print("New handler connection:", obj[name].PropertyChangedEvent.Name)
+        self.connection = obj[name].PropertyChangedEvent:Connect(function()
+          print("Connection called for", name)
+          obj.PropertyChangedEvent:Fire(obj, name, obj[name])
+        end)
+      end
+    end
   end
 
   --- Get the proxy table that contains all this object's data.

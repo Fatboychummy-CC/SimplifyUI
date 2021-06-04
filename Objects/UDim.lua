@@ -68,7 +68,7 @@ UDim:New(function(scale, offset)
   local mt = getmetatable(obj)
   obj:InjectMT(mtInject)
 
-  obj:SetPropertyChangedHandler(function(self, propertyName, newValue)
+  obj:SetPrePropertyChangedHandler(function(self, propertyName, newValue)
     if type(newValue) == "number" then
       return true
     end
