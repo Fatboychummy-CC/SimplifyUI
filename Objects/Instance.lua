@@ -202,42 +202,23 @@ function Instance.New(className, ...)
     expect(1, self, "table")
     if not self.Archivable then return nil end
 
-    local newObj = {
-      _proxy = {
-        readOnly = {
-          Instance = MakeData(true, {"boolean"})
-        },
-        writeable = {
-          Parent = MakeData(Instance.Nil, {"Instance", "nil"}),
-          Archivable = MakeData(true, {"boolean"})
-        },
-        children = {},
-        derives = {}
-      }
-    }
+    -- create a new instance of this object's classtype
+    local newObj = Instance.New(self.ClassName)
 
-    -- clone the information in read-only section
-    for k, value in pairs(self._proxy.readOnly) do
-      newObj._proxy.readOnly[k] = type(value) == "table" and value.Instance and value:Clone() or value
+    -- copy all the current values over.
+    for k, v in pairs(self._proxy.readOnly) do
+      newObj._proxy.readOnly[k].Value = type(v.Value) == "table" and v.Value.Instance and v.Value:Clone() or TE.deepCopy(v)
+    end
+    for k, v in pairs(self._proxy.writeable) do
+      newObj._proxy.writeable[k].Value = type(v.Value) == "table" and v.Value.Instance and v.Value:Clone() or TE.deepCopy(v)
     end
 
-    -- clone the information in writeable section
-    for k, value in pairs(self._proxy.writeable) do
-      newObj._proxy.writeable[k] = type(value) == "table" and value.Instance and value:Clone() or value
-    end
-
-    -- clone the children
+    -- copy all the children over.
     for i, child in ipairs(self:GetChildren()) do
       newObj._proxy.children[i] = child:Clone()
     end
 
-    -- clone the information about what classes this object derives from
-    for i, derivative in ipairs(self._proxy.derives) do
-      newObj._proxy.derives[i] = derivative
-    end
-
-    -- set the metatable of this new object.
-    return setmetatable(newObj, instanceMT)
+    return newObj
   end)
 
   NewMethod("FindFirstAncestor", function(self, name)
