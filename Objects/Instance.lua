@@ -283,6 +283,10 @@ function Instance.New(className, ...)
         return c[i], i
       end
     end
+
+    if recursive then
+      -- TODO: This.
+    end
   end)
 
   NewMethod("FindFirstChildOfClass", function(self, className, recursive)
@@ -290,7 +294,16 @@ function Instance.New(className, ...)
     expect(1, className, "string")
     expect(1, recursive, "boolean")
 
-    -- TODO: This.
+    local c = self._proxy.children
+    for i = 1, #c do
+      if c[i].ClassName == className then
+        return c[i], i
+      end
+    end
+
+    if recursive then
+      -- TODO: This.
+    end
   end)
 
   NewMethod("FindFirstChildWhichIsA", function(self, className, recursive)
