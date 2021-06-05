@@ -386,7 +386,14 @@ function Instance.New(className, ...)
   NewMethod("GetFullName", function(self)
     expect(1, self, "table")
 
-    -- TODO: This.
+    local ancestors = self:GetAncestors()
+    local fullName = ""
+
+    for i = #ancestors, 1, -1 do
+      fullName = fullName .. ancestors[i] .. (i == 1 and "" or ".")
+    end
+
+    return fullName
   end)
 
   NewMethod("GetPropertyChangedSignal", function(self)
