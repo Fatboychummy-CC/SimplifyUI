@@ -103,6 +103,10 @@ local function MakeData(default, allowedTypes, ...)
   }
 end
 
+function Instance.MakeMethod(func)
+  return MakeData(function() return func end, {"function"})
+end
+
 function Instance.New(className, ...)
   local information = Instance.GetInformation(className)
   local obj = {
@@ -129,8 +133,8 @@ function Instance.New(className, ...)
     obj._proxy.derives[i] = information.derives[i]
   end
 
-  local function NewMethod(name)
-    obj._proxy.readOnly[name] = MakeData(function() return func end, {"function"})
+  local function NewMethod(name, func)
+    obj._proxy.readOnly[name] = MakeMethod(func)
   end
 
   --- Remove absolutely everything.
