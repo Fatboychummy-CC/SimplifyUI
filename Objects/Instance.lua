@@ -193,10 +193,47 @@ function Instance.New(className, ...)
     end
   end)
 
+  --- Clone this object, ignoring anything non-archivable.
   NewMethod("Clone", function(self)
     expect(1, self, "table")
+    if not self.Archivable then return nil end
 
-    -- TODO: This.
+    local newObj = {
+      _proxy = {
+        readOnly = {
+          Instance = MakeData(true, {"boolean"})
+        },
+        writeable = {
+          Parent = MakeData(Instance.Nil, {"Instance", "nil"}),
+          Archivable = MakeData(true, {"boolean"})
+        },
+        children = {},
+        derives = {}
+      }
+    }
+
+    -- clone the information in read-only section
+    for k, value in pairs(self._proxy.readOnly) do
+      newObj._proxy.readOnly[k] = type(value) == "table" and value.Instance and value:Clone() or value
+    end
+
+    -- clone the information in writeable section
+    for k, value in pairs(self._proxy.writeable) do
+      newObj._proxy.writeable[k] = type(value) == "table" and value.Instance and value:Clone() or value
+    end
+
+    -- clone the children
+    for i, child in ipairs(self:GetChildren()) do
+      newObj._proxy.children[i] = child:Clone()
+    end
+
+    -- clone the information about what classes this object derives from
+    for i, derivative in ipairs(self._proxy.derives) do
+      newObj._proxy.derives[i] = derivative
+    end
+
+    -- set the metatable of this new object.
+    return setmetatable(newObj, instanceMT)
   end)
 
   NewMethod("FindFirstAncestor", function(self, name)
