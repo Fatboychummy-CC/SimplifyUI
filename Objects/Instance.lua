@@ -136,21 +136,39 @@ function Instance.New(className, ...)
   --- Remove absolutely everything.
   NewMethod("Destroy", function(self)
     expect(1, self, "table")
+    -- remove this object from the parent object.
     if self.Parent ~= Instance.Nil then
-
+      self.Parent:RemoveChild(self.Name)
     end
+
+    -- clear everything in the read-only section.
     for k, v in pairs(self._proxy.readOnly) do
       if v.Destroy then v:Destroy() end
       self._proxy.readOnly[k] = nil
     end
+
+    -- clear everything in the writeable section.
     for k, v in pairs(self._proxy.writeable) do
       if v.Destroy then v:Destroy() end
       self._proxy.writeable[k] = nil
     end
+
+    -- clear all the children
     self:ClearAllChildren()
 
+    -- remove information of derivative classes.
+    for i = 1, #self._proxy.derives do
+      self._proxy.derives[i] = nil
+    end
+
+    -- remove proxy information
     for k in pairs(self._proxy) do self._proxy[k] = nil end
+
+    -- remove proxy
     self._proxy = nil
+
+    -- remove metatable.
+    setmetatable(self, nil)
   end)
 
   NewMethod("RemoveChild", function(self, name)
