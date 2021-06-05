@@ -105,7 +105,8 @@ function Instance.New(className, ...)
         Instance = MakeData(true, {"boolean"})
       },
       writeable = {
-        Parent = MakeData(Instance.Nil, {"Instance"})
+        Parent = MakeData(Instance.Nil, {"Instance", "nil"}),
+        Archivable = MakeData(true, {"boolean"})
       },
       children = {},
     }
