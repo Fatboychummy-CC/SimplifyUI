@@ -327,7 +327,11 @@ function Instance.New(className, ...)
     expect(1, self, "table")
     expect(1, name, "string")
 
-    -- TODO: This.
+    for i, descendant in ipairs(self:GetDescendants()) do
+      if descendant.Name == name then
+        return descendant, i
+      end
+    end
   end)
 
   NewMethod("GetActor", function(self)
