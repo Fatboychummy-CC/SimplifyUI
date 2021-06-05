@@ -449,6 +449,7 @@ function Instance.New(className, ...)
     -- TODO: Figure out if I'm doing signals.
   end)
 
+  -- set the metatable.
   return setmetatable(obj, instanceMT)
 end
 
