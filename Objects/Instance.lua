@@ -419,7 +419,15 @@ function Instance.New(className, ...)
     expect(1, self, "table")
     expect(1, descendant, "table")
 
-    -- TODO: This.
+    for i, _descendant in ipairs(self:GetDescendants()) do
+      if _descendant == descendant then
+        return true
+      end
+    end
+
+    return false
+  end)
+
   end)
 
   NewMethod("WaitForChild", function(self, childName, timeOut)
