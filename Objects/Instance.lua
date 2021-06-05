@@ -349,7 +349,24 @@ function Instance.New(className, ...)
   NewMethod("GetDescendants", function(self)
     expect(1, self, "table")
 
-    -- TODO: This.
+    local children = self:GetChildren()
+
+    local descendants = {}
+    local n = 0
+    local function insert(v)
+      descendants.n = descendants.n + 1
+      descendants[n] = v
+    end
+    for i = 1, #children do
+      insert(children[i])
+      local childDescendants = children[i]:GetDescendants()
+      for j = 1, #childDescendants do
+        insert(childDescendants[j])
+      end
+    end
+
+    return descendants
+  end)
   end)
 
   NewMethod("GetFullName", function(self)
