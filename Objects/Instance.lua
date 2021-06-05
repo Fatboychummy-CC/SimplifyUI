@@ -123,6 +123,31 @@ function Instance.New(className, ...)
     }
   }
 
+  -- collect all the superclasses
+  if #information.derives > 0 then
+    -- for each superclass, starting from the "most super" superclass
+    for i = 1, #information.derives do
+      -- instantiate an object
+      local super = Instance.New(information.derives[i])
+
+      -- copy all of its data
+      for k, v in pairs(super._proxy.readOnly) do
+        if type(v.Default) == "table" and v.Default.Instance then
+          obj._proxy.readOnly[k] = MakeData(v.Default:Clone(), AllowedTypes = TE.copy(v.AllowedTypes))
+        else
+          obj._proxy.readOnly[k] = TE.deepCopy(v)
+        end
+      end -- for proxy.readOnly
+      for k, v in pairs(super._proxy.writeable) do
+        if type(v.Default) == "table" and v.Default.Instance then
+          obj._proxy.writeable[k] = MakeData(v.Default:Clone(), AllowedTypes = TE.copy(v.AllowedTypes))
+        else
+          obj._proxy.writeable[k] = TE.deepCopy(v)
+        end
+      end -- for proxy.writeable
+    end -- for information.derives
+  end
+
   for k, v in pairs(information.readOnly) do
     obj._proxy.readOnly[k] = MakeData(v.Default, v.AllowedTypes, ...)
   end
