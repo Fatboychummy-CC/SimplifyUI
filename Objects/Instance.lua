@@ -240,7 +240,12 @@ function Instance.New(className, ...)
     expect(1, self, "table")
     expect(2, name, "string")
 
-    -- TODO: This.
+    local current = self.Parent
+    while current ~= Instance.Nil and current.Name ~= name do
+      current = current.Parent
+    end
+
+    return current
   end)
 
   NewMethod("FindFirstAncestorOfClass", function(self, className)
