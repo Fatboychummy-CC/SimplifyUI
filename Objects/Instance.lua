@@ -311,7 +311,16 @@ function Instance.New(className, ...)
     expect(1, className, "string")
     expect(1, recursive, "boolean")
 
-    -- TODO: This.
+    local c = self._proxy.children
+    for i = 1, #c do
+      if c[i]:IsA(className) then
+        return c[i], i
+      end
+    end
+
+    if recursive then
+      -- TODO: This.
+    end
   end)
 
   NewMethod("FindFirstDescendant", function(self, name)
