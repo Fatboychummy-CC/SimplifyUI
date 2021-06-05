@@ -171,12 +171,14 @@ function Instance.New(className, ...)
     setmetatable(self, nil)
   end)
 
+  -- Find a child by name -- remove it if it's there.
   NewMethod("RemoveChild", function(self, name)
     expect(1, self, "table")
-    expect(1, name, "string")
+    expect(2, name, "string")
+
     local _, index = self:FindFirstChild(name)
     if index then
-      table.remove(self._proxy.children, index)
+      return table.remove(self._proxy.children, index)
     end
   end)
 
