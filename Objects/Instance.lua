@@ -406,7 +406,13 @@ function Instance.New(className, ...)
     expect(1, self, "table")
     expect(1, className, "string")
 
-    -- TODO: This.
+    for i = 1, #self._proxy.derives do
+      if self._proxy.derives[i] == className then
+        return true
+      end
+    end
+
+    return false
   end)
 
   NewMethod("IsAncestorOf", function(self, descendant)
