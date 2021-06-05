@@ -109,6 +109,7 @@ function Instance.New(className, ...)
         Archivable = MakeData(true, {"boolean"})
       },
       children = {},
+      derives = {}
     }
   }
 
@@ -117,6 +118,9 @@ function Instance.New(className, ...)
   end
   for k, v in pairs(information.writeable) do
     obj._proxy.writeable[k] = MakeData(v.Default, v.AllowedTypes, ...)
+  end
+  for i = 1, #information.derives do
+    obj._proxy.derives[i] = information.derives[i]
   end
 
   local function NewMethod(name)
@@ -284,7 +288,8 @@ end
 ---
 -- @tparam string className The name of the class to create.
 -- @tparam table properties The property information for the class. Should be a list of `Instance.Property`s.
-function Instance.Create(className, properties)
+-- @tparam string|nil derives The class this object derives from. If that class has not been instantiated yet, this will throw an error.
+function Instance.Create(className, properties, derives)
   expect(1, className, "string")
   expect(2, properties, "table")
 
@@ -295,7 +300,21 @@ function Instance.Create(className, properties)
     writeable = {
       Name = ClassName
     },
+    derives = {}
   }
+
+  if derives then -- get the classes this class derives from.
+    local info = Instance.GetInformation(derives)
+    if info then
+      for i, derivative in ipairs(info) do
+        obj.derives[i] = derivative
+      end
+
+      obj.derives[#obj.derives + 1] = derives
+    else
+      error(string.format("Derivative class %d does not exist.", derives), 2)
+    end
+  end
 
   for i = 1, #properties do
     local property = properties[i]
