@@ -21,7 +21,7 @@ local instanceMT = {}
 -- Writeable if:
 -- 1. In writeable table
 -- 2. Type is a class or coreluatype in AllowedTypes, or type is Instance and Instance is in AllowedTypes
-function instanceMT.__newindex = function(self, key, newValue)
+function instanceMT.__newindex(self, key, newValue)
   -- if we're trying to write to a readonly member, fail.
   if type(self._proxy.readOnly[key]) ~= "nil" then
     error(string.format("%s is a read-only member of %s", key, self.ClassName), 2)
@@ -54,7 +54,7 @@ function instanceMT.__newindex = function(self, key, newValue)
   error(string.format("%s is not a valid member of %s", key, self.ClassName), 2)
 end
 
-function instanceMT.__index = function(self, key)
+function instanceMT.__index(self, key)
   -- If it's in the readonly portion, return it.
   if type(self._proxy.readOnly[key]) ~= "nil" then return self._proxy.readOnly[key].Value end
   -- If its in the writeable portion, return it.
@@ -111,7 +111,7 @@ function Instance.New(className, ...)
         Instance = MakeData(true, {"boolean"})
       },
       writeable = {
-        Parent = MakeData(Instance.Nil, {"Instance", ["nil"] = function() return Instance.nil end}),
+        Parent = MakeData(Instance.Nil, {"Instance", ["nil"] = function() return Instance.Nil end}),
         Archivable = MakeData(true, {"boolean"})
       },
       children = {},
@@ -493,7 +493,7 @@ function Instance.Create(className, properties, derives)
     end
   end
 
-  Instance.Classes[classname] = obj
+  Instance.Classes[className] = obj
 end
 
 function Instance.Finalize()
@@ -502,4 +502,4 @@ function Instance.Finalize()
   Instance.Finalize = nil
 end
 
-return M
+return Instance
