@@ -133,14 +133,14 @@ function Instance.New(className, ...)
       -- copy all of its data
       for k, v in pairs(super._proxy.readOnly) do
         if type(v.Default) == "table" and v.Default.Instance then
-          obj._proxy.readOnly[k] = MakeData(v.Default:Clone(), AllowedTypes = TE.copy(v.AllowedTypes))
+          obj._proxy.readOnly[k] = MakeData(v.Default:Clone(), TE.copy(v.AllowedTypes))
         else
           obj._proxy.readOnly[k] = TE.deepCopy(v)
         end
       end -- for proxy.readOnly
       for k, v in pairs(super._proxy.writeable) do
         if type(v.Default) == "table" and v.Default.Instance then
-          obj._proxy.writeable[k] = MakeData(v.Default:Clone(), AllowedTypes = TE.copy(v.AllowedTypes))
+          obj._proxy.writeable[k] = MakeData(v.Default:Clone(), TE.copy(v.AllowedTypes))
         else
           obj._proxy.writeable[k] = TE.deepCopy(v)
         end
@@ -159,7 +159,7 @@ function Instance.New(className, ...)
   end
 
   local function NewMethod(name, func)
-    obj._proxy.readOnly[name] = MakeMethod(func)
+    obj._proxy.readOnly[name] = Instance.MakeMethod(func)
   end
 
   --- Remove absolutely everything.
