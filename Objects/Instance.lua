@@ -428,6 +428,17 @@ function Instance.New(className, ...)
     return false
   end)
 
+  NewMethod("IsDescendantOf", function(self, ancestor)
+    expect(1, self, "table")
+    expect(2, ancestor, "table")
+
+    for i, _ancestor in ipairs(self:GetAncestors()) do
+      if _ancestor == ancestor then
+        return true
+      end
+    end
+
+    return false
   end)
 
   NewMethod("WaitForChild", function(self, childName, timeOut)
