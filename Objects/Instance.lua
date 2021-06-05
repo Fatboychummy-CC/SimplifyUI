@@ -264,7 +264,12 @@ function Instance.New(className, ...)
     expect(1, self, "table")
     expect(1, className, "string")
 
-    -- TODO: This.
+    local current = self.Parent
+    while current ~= Instance.Nil and current:IsA(className) do
+      current = current.Parent
+    end
+
+    return current
   end)
 
   NewMethod("FindFirstChild", function(self, name, recursive)
