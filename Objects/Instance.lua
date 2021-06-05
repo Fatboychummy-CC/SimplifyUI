@@ -40,6 +40,12 @@ function instanceMT.__newindex = function(self, key, newValue)
       return
     end
 
+    -- If type override, run the override function.
+    if t.AllowedTypes[newType] then
+      self._proxy.writeable[key].Value = t.AllowedTypes[newType](self, newValue)
+      return
+    end
+
     -- if none of the above, fail.
     expect(3, newValue, table.unpack(t.AllowedTypes))
   end
@@ -70,7 +76,7 @@ end
 -- @tparam string name The name of the property.
 -- @tparam boolean readOnly Is this property only internally settable?
 -- @param default The default value of something, or a function which returns a default value.
--- @tparam table allowedTypes The allowed types (either Instance or core lua type) this property can be.
+-- @tparam table allowedTypes The allowed types (either ClassName or core lua type) this property can be. If you index by a classname, when setting an object to this type it will run the function given with 'self' and 'newobject' as parameters.
 -- @tparam table|nil onChange This function is run when a property is changed.
 -- @note If default is a function, it will get passed a list of arguments -- namely, those passed to `Instance.New`
 function Instance.Property(name, readOnly, default, allowedTypes, onChange)
@@ -105,7 +111,7 @@ function Instance.New(className, ...)
         Instance = MakeData(true, {"boolean"})
       },
       writeable = {
-        Parent = MakeData(Instance.Nil, {"Instance", "nil"}),
+        Parent = MakeData(Instance.Nil, {"Instance", ["nil"] = function() return Instance.nil end}),
         Archivable = MakeData(true, {"boolean"})
       },
       children = {},
