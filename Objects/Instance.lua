@@ -367,6 +367,20 @@ function Instance.New(className, ...)
 
     return descendants
   end)
+
+  NewMethod("GetAncestors", function(self)
+    expect(1, self, "table")
+
+    local ancestors = {}
+    local n = 0
+
+    local current = self.Parent
+    while current ~= Instance.Nil do
+      n = n + 1
+      ancestors[n] = current
+    end
+
+    return ancestors
   end)
 
   NewMethod("GetFullName", function(self)
