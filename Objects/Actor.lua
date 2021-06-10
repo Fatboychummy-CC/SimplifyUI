@@ -32,6 +32,27 @@ function Actor.New(coro)
   os.queueEvent("new_actor")
 end
 
+function Actor.GetN()
+  return actors.n
+end
+
+function Actor.Clear()
+  while actors[1] do
+    RemoveActor(1)
+  end
+end
+
+function Actor.Remove(coro)
+  expect(1, coro, "thread")
+
+  for i = 1, actors.n do
+    if actors[i].coroutine == coro then
+      RemoveActor(i)
+      return
+    end
+  end
+end
+
 --- Run all the coroutines.
 function Actor.Run(yieldFunc)
   yieldFunc = yieldFunc or coroutine.yield
