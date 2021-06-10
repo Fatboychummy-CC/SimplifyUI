@@ -120,7 +120,7 @@ for k, v in pairs(Expectations) do
   toInject["ASSERT_" .. k] = generateWrapper(v, true)
 end
 toInject.PASS = generateWrapper(function() return true, "" end, false)
-toInject.FAIL = generateWrapper(function() return false, "Forceful failure." end, true)
+toInject.FAIL = generateWrapper(function(reason) return false, reason or "Forceful failure." end, true)
 
 local function countTests()
   local total = 0
