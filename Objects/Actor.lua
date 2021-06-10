@@ -8,6 +8,16 @@ local function InsertActor(actor)
   actors[actors.n] = actor
 end
 local function RemoveActor(actor)
+  -- direct link to index.
+  if type(actor) == "number" then
+    local temp = table.remove(actors, actor)
+    if temp then
+      actors.n = actors.n - 1
+    end
+    return
+  end
+
+  -- not a number
   for i = 1, actors.n do
     if actor == actors[i] then
       table.remove(actors, i)
@@ -19,7 +29,7 @@ end
 
 --- Create a new actor.
 function Actor.New(coro)
-  expect(coro, 1, "thread", "function")
+  expect(1, coro, "thread", "function")
 
   -- Convert function to a coroutine, if required.
   coro = type(coro) == "function" and coroutine.create(coro) or coro
@@ -62,7 +72,10 @@ function Actor.Run(yieldFunc)
     local event = eventData[1]
 
     -- loop through each actor and pass event data to them, if wanted.
+    local actorsToRemove = {n = 0}
     for i = 1, actors.n do
+      local actor = actors[i]
+
       -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
       if actor.listening and actor.listening == event or not actor.listening then
         -- resume the coroutine with the event data.
@@ -78,9 +91,14 @@ function Actor.Run(yieldFunc)
 
         -- If the actor is now dead, remove it.
         if coroutine.status(actor.coroutine) == "dead" then
-          RemoveActor(actor)
+          actorsToRemove.n = actorsToRemove.n + 1
+          actorsToRemove[actorsToRemove.n] = i
         end
       end
+    end
+
+    for i = actorsToRemove.n, 1, -1 do
+      RemoveActor(i)
     end
   end
 end
