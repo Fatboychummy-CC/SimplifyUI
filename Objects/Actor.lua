@@ -136,7 +136,7 @@ function Actor.Run(yieldFunc, main)
       RemoveActor(actorsToRemove[i])
     end
 
-
+    -- If the main thread has died for whichever reason, stop.
     if hasMain and not actors[mainID] then
       error("Actor: Main thread has stopped.", -1)
     end
