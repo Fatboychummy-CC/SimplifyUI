@@ -2,26 +2,27 @@ local expect = require "cc.expect".expect
 
 local Actor = {}
 
-local actors = {n = 0}
-local function InsertActor(actor)
-  actors.n = actors.n + 1
-  actors[actors.n] = actor
-end
-local function RemoveActor(actor)
-  -- direct link to index.
-  if type(actor) == "number" then
-    local temp = table.remove(actors, actor)
-    if temp then
-      actors.n = actors.n - 1
-    end
-    return
-  end
+local actors = {lastID = 0}
+local actorRunOrder = {n = 0}
+local function InsertActor(actorData)
+  -- create the actor data
+  actors.lastID = actors.lastID + 1
+  actors[actors.lastID] = actorData
 
-  -- not a number
-  for i = 1, actors.n do
-    if actor == actors[i] then
-      table.remove(actors, i)
-      actors.n = actors.n - 1
+  -- add actor to runorder
+  actorRunOrder.n = actorRunOrder + 1
+  actorRunOrder[actorRunOrder.n] = actors.lastID
+
+  -- return the id of this actor
+  return actors.lastID
+end
+local function RemoveActor(actorID)
+  expect(1, actorID, "number")
+
+  actors[actorID] = nil
+  for i = 1, actorRunOrder.n do
+    if actorRunOrder[i] == actorID then
+      table.remove(actorRunOrder, i)
       return
     end
   end
@@ -38,43 +39,70 @@ function Actor.New(coro)
     coroutine = coro
   }
 
-  InsertActor(actorData)
+  local actorID = InsertActor(actorData)
+  actorData.actorID = actorID
   os.queueEvent("new_actor")
+
+  return actorData
 end
 
 function Actor.GetN()
-  return actors.n
+  local count = 0
+  for _ in pairs(actors) do
+    count = count + 1
+  end
+  return count
 end
 
 function Actor.Clear()
-  while actors[1] do
-    RemoveActor(1)
+  for id in pairs(actors) do
+    RemoveActor(id)
   end
 end
 
 function Actor.Remove(coro)
-  expect(1, coro, "thread")
+  expect(1, coro, "thread", "number")
 
-  for i = 1, actors.n do
-    if actors[i].coroutine == coro then
-      RemoveActor(i)
+  if type(coro) == "number" then
+    RemoveActor(coro)
+    return
+  end
+
+  for id, actor in pairs(actors) do
+    if actor.coroutine == coro then
+      RemoveActor(id)
       return
     end
   end
 end
 
 --- Run all the coroutines.
-function Actor.Run(yieldFunc)
+function Actor.Run(yieldFunc, main)
   yieldFunc = yieldFunc or coroutine.yield
+  expect(1, yieldFunc, "function")
+  expect(2, main, "function", "thread", "nil")
+  local hasMain, mainID = false, 0
 
+  -- If the player inserted a func or coroutine to main, insert it as an actor to be run.
+  if type(main) == "function" or type(main) == "thread" then
+    local actorData = {
+      coroutine = type(main) == "function" and coroutine.create(main) or main
+    }
+
+    hasMain = true
+    mainID = InsertActor(actorData)
+  end
+
+  -- Main loop - Run stuff forever.
   while true do
     local eventData = table.pack(yieldFunc())
     local event = eventData[1]
+    local actorsToRemove = {n = 0}
 
     -- loop through each actor and pass event data to them, if wanted.
-    local actorsToRemove = {n = 0}
-    for i = 1, actors.n do
-      local actor = actors[i]
+    for i = 1, actorRunOrder.n do
+      local actorID = actorRunOrder[i]
+      local actor = actors[actorID]
 
       -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
       if actor.listening and actor.listening == event or not actor.listening then
@@ -83,7 +111,13 @@ function Actor.Run(yieldFunc)
 
         -- If the coroutine errored, error.
         if not ok then
-          error(string.format("Actor threw an error: %s", result), -1)
+          error(
+            string.format(
+              "Actor: Actor '%s' threw an error: %s",
+              actorID == mainID and "Main Thread" or actorID,
+              result),
+            -1
+          )
         end
 
         -- assign the actor to listen for whatever they wanted to listen for.
@@ -92,13 +126,19 @@ function Actor.Run(yieldFunc)
         -- If the actor is now dead, remove it.
         if coroutine.status(actor.coroutine) == "dead" then
           actorsToRemove.n = actorsToRemove.n + 1
-          actorsToRemove[actorsToRemove.n] = i
+          actorsToRemove[actorsToRemove.n] = actorID
         end
       end
     end
 
+    -- Actually remove the dead coroutine
     for i = actorsToRemove.n, 1, -1 do
-      RemoveActor(i)
+      RemoveActor(actorsToRemove[i])
+    end
+
+
+    if hasMain and not actors[mainID] then
+      error("Actor: Main thread has stopped.", -1)
     end
   end
 end
