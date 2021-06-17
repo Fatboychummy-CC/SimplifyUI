@@ -10,12 +10,13 @@ local function InsertActor(actorData)
   actors[actors.lastID] = actorData
 
   -- add actor to runorder
-  actorRunOrder.n = actorRunOrder + 1
+  actorRunOrder.n = actorRunOrder.n + 1
   actorRunOrder[actorRunOrder.n] = actors.lastID
 
   -- return the id of this actor
   return actors.lastID
 end
+
 local function RemoveActor(actorID)
   expect(1, actorID, "number")
 
@@ -47,7 +48,7 @@ function Actor.New(coro)
 end
 
 function Actor.GetN()
-  local count = 0
+  local count = -1 -- init at -1 to "uncount" the `lastID` value.
   for _ in pairs(actors) do
     count = count + 1
   end
@@ -55,8 +56,10 @@ function Actor.GetN()
 end
 
 function Actor.Clear()
-  for id in pairs(actors) do
-    RemoveActor(id)
+  local ids = {}
+  for id in pairs(actors) do if type(id) == "number" then ids[#ids + 1] = id end end
+  for i = 1, #ids do
+    RemoveActor(ids[i])
   end
 end
 
@@ -69,7 +72,7 @@ function Actor.Remove(coro)
   end
 
   for id, actor in pairs(actors) do
-    if actor.coroutine == coro then
+    if type(actor) == "table" and actor.coroutine == coro then
       RemoveActor(id)
       return
     end
@@ -105,7 +108,7 @@ function Actor.Run(yieldFunc, main)
       local actor = actors[actorID]
 
       -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
-      if actor.listening and actor.listening == event or not actor.listening then
+      if actor and (actor.listening and actor.listening == event or not actor.listening) then
         -- resume the coroutine with the event data.
         local ok, result = coroutine.resume(actor.coroutine, table.unpack(eventData, 1, eventData.n))
 

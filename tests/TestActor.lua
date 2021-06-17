@@ -89,7 +89,7 @@ Framework.newSuite "TestActor"
       end
     )
   end)
-  "RECEIVES_TERMINATE" (function()
+  "RECEIVES_TERMINATE" (DISABLED, function()
     --[[Actor.Clear()
     local terminated = false
 

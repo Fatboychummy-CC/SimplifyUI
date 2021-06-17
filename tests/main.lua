@@ -5,4 +5,4 @@ _G.cctest = cctest
 
 require "TestActor"
 
-cctest.runAllTests()
+cctest.runAllTests(...)
