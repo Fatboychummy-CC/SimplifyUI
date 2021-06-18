@@ -110,3 +110,51 @@ Framework.newSuite "TestActor"
     EXPECT_TRUE(ok)]]
     FAIL("I am unsure how to do this without killing the test framework as well.")
   end)
+  "REMOVES_ID" (function()
+    Actor.Clear()
+
+    local removed = false
+
+    local coro = coroutine.create(function()
+      while true do removed = false os.sleep() end
+    end)
+    local actorData = Actor.New(coro)
+
+    parallel.waitForAny(
+      Actor.Run,
+      function()
+        removed = true
+        Actor.Remove(actorData.actorID)
+        os.sleep(1)
+      end
+    )
+
+    EXPECT_TRUE(removed)
+  end)
+  "REMOVES_COROUTINE" (function()
+    Actor.Clear()
+
+    local removed = false
+
+    local coro = coroutine.create(function()
+      while true do removed = false os.sleep() end
+    end)
+    Actor.New(coro)
+
+    parallel.waitForAny(
+      Actor.Run,
+      function()
+        removed = true
+        Actor.Remove(coro)
+        os.sleep(1)
+      end
+    )
+
+    EXPECT_TRUE(removed)
+  end)
+  "ACTOR_REMOVE_ERRORS" (function()
+    EXPECT_THROW_ANY_ERROR(Actor.Remove, "stringValue")
+    EXPECT_THROW_ANY_ERROR(Actor.Remove, {})
+    EXPECT_THROW_ANY_ERROR(Actor.Remove, function() end)
+    EXPECT_THROW_ANY_ERROR(Actor.Remove)
+  end)
