@@ -89,26 +89,26 @@ Framework.newSuite "TestActor"
       end
     )
   end)
-  "RECEIVES_TERMINATE" (DISABLED, function()
-    --[[Actor.Clear()
-    local terminated = false
-
+  "RECEIVES_TERMINATE" (function()
+    Actor.Clear()
     local coro = coroutine.create(function()
-      local event = os.pullEventRaw("SomeEvent")
-      if event == "terminate" then
-        terminated = true
-      end
+      os.pullEvent("SomeEvent")
     end)
 
     local ok, err = pcall(
-      parallel.waitForAny,
-      Actor.Run,
+      parallel.waitForAll,
       function()
+        Actor.Run()
+      end,
+      function()
+        os.sleep(0.2)
+        os.queueEvent(DUMMY_TERMINATE())
+        os.sleep(0.2)
       end
     )
 
-    EXPECT_TRUE(ok)]]
-    FAIL("I am unsure how to do this without killing the test framework as well.")
+    EXPECT_FALSE(ok)
+    EXPECT_EQ(err, "Terminated")
   end)
   "REMOVES_ID" (function()
     Actor.Clear()
