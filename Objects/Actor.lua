@@ -29,16 +29,55 @@ local function RemoveActor(actorID)
   end
 end
 
+local actorObjectMetaTable = {
+  __index = {
+    -- adds
+    CallFriend = function(self, actorID, ...)
+      expect(1, self, "table")
+      expect(2, actorID, "number")
+      if actors[actorID] then
+        actors[actorID]:Call(self.actorID, ...)
+      end
+    end,
+    Call = function(self, ...)
+      expect(1, self, "table")
+
+      self.callData.n = self.callData.n + 1
+      self.callData[self.callData.n] = table.pack(...)
+    end,
+    Read = function(self)
+      expect(1, self, "table")
+
+      local data = table.remove(self.callData, 1)
+      if data then
+        self.callData.n = self.callData.n - 1
+        return table.unpack(data, 1, data.n)
+      end
+    end,
+    Available = function(self)
+      expect(1, self, "table")
+
+      return self.callData.n > 0
+    end
+  },
+  __call = function(self, ...)
+    self:Call(...)
+  end
+}
+
 --- Create a new actor.
-function Actor.New(coro)
+function Actor.New(coro, yieldFunc)
   expect(1, coro, "thread", "function")
+  expect(2, yieldFunc, "function", "nil")
 
   -- Convert function to a coroutine, if required.
   coro = type(coro) == "function" and coroutine.create(coro) or coro
 
-  local actorData = {
-    coroutine = coro
-  }
+  local actorData = setmetatable({
+    coroutine = coro,
+    callData = {n = 0},
+    yieldFunc = yieldFunc
+  }, actorObjectMetaTable)
 
   local actorID = InsertActor(actorData)
   actorData.actorID = actorID
@@ -108,7 +147,7 @@ function Actor.Run(yieldFunc, main)
       local actor = actors[actorID]
 
       -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
-      if actor and (actor.listening and actor.listening == event or not actor.listening) then
+      if actor and (actor.filter and actor.filter == event or not actor.filter) then
         -- resume the coroutine with the event data.
         local ok, result = coroutine.resume(actor.coroutine, table.unpack(eventData, 1, eventData.n))
 
@@ -124,7 +163,7 @@ function Actor.Run(yieldFunc, main)
         end
 
         -- assign the actor to listen for whatever they wanted to listen for.
-        actor.listening = result
+        actor.filter = result
 
         -- If the actor is now dead, remove it.
         if coroutine.status(actor.coroutine) == "dead" then
