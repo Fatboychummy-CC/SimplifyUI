@@ -467,9 +467,12 @@ end
 -- @tparam string className The name of the class to create.
 -- @tparam table properties The property information for the class. Should be a list of `Instance.Property`s.
 -- @tparam string|nil derives The class this object derives from. If that class has not been instantiated yet, this will throw an error.
-function Instance.Create(className, properties, derives)
+function Instance.Create(className, properties, metaAdditions, constructor, derives)
   expect(1, className, "string")
   expect(2, properties, "table")
+  expect(3, metaAdditions, "table")
+  expect(4, constructor, "function", "nil")
+  expect(5, derives, "string", "nil")
 
   local obj = {
     readOnly = {
@@ -479,6 +482,7 @@ function Instance.Create(className, properties, derives)
       Name = ClassName
     },
     derives = {}
+    constructor = constructor and constructor or function() end
   }
 
   if derives then -- get the classes this class derives from.
@@ -504,6 +508,12 @@ function Instance.Create(className, properties, derives)
   end
 
   Instance.Classes[className] = obj
+
+  return {
+    new = function(...)
+
+    end
+  }
 end
 
 function Instance.Finalize()
