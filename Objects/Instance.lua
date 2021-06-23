@@ -2,13 +2,39 @@
 -- @module Instance
 
 
-local InstanceRoot = {}
 local Instance = {
   Archivable = false,
   ClassName = "Instance",
   Name = "Instance",
-  Instances = {}
+  Instances = {},
+  INSTANCE_ROOT = {IsInstance = true}
 } --- @type Instance
+
+
+-- Children metatable for tracking ancestry.
+local childrenMetaTable = {}
+function childrenMetaTable:__index(idx)
+  return self._proxy[idx]
+end
+
+function childrenMetaTable:__newindex(idx, value)
+  local proxy = self._proxy
+  if type(idx) == "table" and idx.IsInstance then
+    if value == nil then
+      for i = 1, #proxy do
+        if idx == proxy[i] then
+          table.remove(proxy, i)
+          return
+        end
+      end
+    elseif value == true then
+      table.insert(proxy, idx)
+      return
+    end
+  end
+
+  error("Do not insert manually to the children table, change the child Instance's 'Instance.Parent' instead.", 2)
+end
 
 --- Register a new instance type, for IsA.
 -- @tparam string className The name of the class.
@@ -21,16 +47,54 @@ function Instance.Register(className, inherits)
 end
 
 function Instance.CloneMetaTable()
-  return {__index = Instance}
+  return {
+    __pairs = function()
+      error("Invalid argument #1 to 'pairs' (table expected, got Instance)", 2)
+    end,
+    __index = function(self, idx) -- Index function, check if parent, else check instance table.
+      if idx == "Parent" then
+        return self._proxy.Parent
+      end
+
+      -- Check through Instance and return it.
+      if Instance[idx] then return Instance[idx] end
+
+      -- does not exist, error
+      error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
+    end,
+    __newindex = function(self, idx, value)
+      if idx == "Parent" then
+        if type(value) ~= "table" and value ~= nil  then
+          error(string.format("Invalid argument #3 (Instance or nil expected, got %s)", type(value)), 2)
+        end
+        if not value.IsInstance then
+          error("Invalid argument #3 (Instance or nil expected, got table)", 2)
+        end
+
+        -- Tell the children metatable of the parent to remove this value.
+        if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
+          self._proxy.Parent.Children[value] = nil
+        end
+
+        -- set the new parent
+        self._proxy.Parent = value and value
+
+        -- tell the children metatable of the new parent to add this as a child.
+        value.Children[self] = true
+      else
+        error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
+      end
+    end
+  }
 end
 
 --- Create an instance.
--- @tparam table self The object to be created.
+-- @tparam table self The object to be created. The most notable change from Roblox Instance to these Instances are that these Instance take the `require`d object instead of a string name.
 -- @treturn table the object created.
 function Instance.new(class, ...)
   expect(1, class, "table")
 
-  if not class.Construct then
+  if not class.new or class == Instance then
     error(
       string.format(
         "Unable to create an Instance of type \"%s\"",
@@ -39,12 +103,15 @@ function Instance.new(class, ...)
     )
   end
 
+
+
   local AllInstances = {
+    IsInstance = true,
     Archivable = true,
     ClassName = class.ClassName,
     Name = class.ClassName,
-    Parent = InstanceRoot,
-    Children = {}
+    Children = setmetatable({_proxy = {}}, childrenMetaTable),
+    _proxy = {Parent = Instance.INSTANCE_ROOT}
   }
 
   return class.new(setmetatable(AllInstances, Instance:CloneMetaTable()), ...)
