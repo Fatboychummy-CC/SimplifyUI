@@ -22,6 +22,7 @@ end
 -- @tparam table|number instanceData Internal use, or the scale for direct call.
 -- @tparam number scale scale Internal use, or the offset for direct call.
 -- @tparam number|nil offset Internal use only.
+-- @treturn UDim The new object.
 function UDim.new(instanceData, scale, offset)
   expect(1, instanceData, "table", "number")
   expect(2, scale, "number")
