@@ -37,13 +37,13 @@ function childrenMetaTable:__newindex(idx, value)
 end
 
 --- Register a new instance type, for IsA.
--- @tparam string className The name of the class.
+-- @tparam table class The class to be registered.
 -- @tparam table|nil inherits The classes this class inherits from.
-function Instance.Register(className, inherits)
-  expect(1, className, "string")
+function Instance.Register(class, inherits)
+  expect(1, class, "string")
   expect(2, inherits, "table", "nil")
 
-  Instances[className] = inherits and inherits or {}
+  Instances[class] = inherits and inherits or {}
 end
 
 function Instance.CloneMetaTable()
@@ -59,30 +59,42 @@ function Instance.CloneMetaTable()
       -- Check through Instance and return it.
       if Instance[idx] then return Instance[idx] end
 
+      -- Check through the Instance's inheritance tree.
+      local inheritance = Instances[self._proxy.Class]
+      if inheritance then
+        for i = 1, #inheritance do
+          if inheritance[i][idx] then return inheritance[i][idx] end
+        end
+      end
+
       -- does not exist, error
       error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
     end,
     __newindex = function(self, idx, value)
-      if idx == "Parent" then
-        if type(value) ~= "table" and value ~= nil  then
-          error(string.format("Invalid argument #3 (Instance or nil expected, got %s)", type(value)), 2)
-        end
-        if not value.IsInstance then
-          error("Invalid argument #3 (Instance or nil expected, got table)", 2)
-        end
-
-        -- Tell the children metatable of the parent to remove this value.
-        if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
-          self._proxy.Parent.Children[value] = nil
-        end
-
-        -- set the new parent
-        self._proxy.Parent = value and value
-
-        -- tell the children metatable of the new parent to add this as a child.
-        value.Children[self] = true
+      if self.WRITING then
+        rawset(self, idx, value)
       else
-        error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
+        if idx == "Parent" then
+          if type(value) ~= "table" and value ~= nil  then
+            error(string.format("Invalid argument #3 (Instance or nil expected, got %s)", type(value)), 2)
+          end
+          if not value.IsInstance then
+            error("Invalid argument #3 (Instance or nil expected, got table)", 2)
+          end
+
+          -- Tell the children metatable of the parent to remove this value.
+          if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
+            self._proxy.Parent.Children[value] = nil
+          end
+
+          -- set the new parent
+          self._proxy.Parent = value and value
+
+          -- tell the children metatable of the new parent to add this as a child.
+          value.Children[self] = true
+        else
+          error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
+        end
       end
     end
   }
@@ -111,7 +123,12 @@ function Instance.new(class, ...)
     ClassName = class.ClassName,
     Name = class.ClassName,
     Children = setmetatable({_proxy = {}}, childrenMetaTable),
-    _proxy = {Parent = Instance.INSTANCE_ROOT}
+    _proxy = {
+      Parent = Instance.INSTANCE_ROOT,
+      Class = class
+    },
+    WRITING = true,
+    _internal = {}
   }
 
   return class.new(setmetatable(AllInstances, Instance:CloneMetaTable()), ...)
@@ -327,16 +344,19 @@ end
 -- @tparam string className The name of the class to check for inheritance.
 -- @treturn boolean If this object inherits from the given ClassName
 function Instance:IsA(className)
-  expect(1, self, "table")
   expect(2, className, "string")
+
+  -- Base case: if not a table, or not an instance, return false.
+  if type(self) ~= "table" then return false end
+  if not self.IsInstance then return false end
 
   -- base case: this class is the class we're looking for.
   if self.ClassName == className then return true end
 
   -- else look at the inheritance list.
-  local inheritance = Instance.Instances[self.ClassName]
+  local inheritance = Instance.Instances[self._proxy.Class]
   for i = 1, #inheritance do
-    if className == inheritance[i] then
+    if className == inheritance[i].ClassName then
       return true
     end
   end
@@ -381,3 +401,5 @@ function Instance:IsDescendantOf(ancestor)
 
   return false
 end
+
+return Instance
