@@ -2,7 +2,7 @@
 -- @module[kind=Instance] UDim
 
 local Instance = require "Objects.Instance"
-local expect = require "cc.expect"
+local expect = require "cc.expect".expect
 
 Instance.Register("UDim")
 

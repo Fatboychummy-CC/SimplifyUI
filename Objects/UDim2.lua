@@ -3,7 +3,7 @@
 
 local Instance = require "Objects.Instance"
 local UDim = require "Objects.UDim2"
-local expect = require "cc.expect"
+local expect = require "cc.expect".expect
 
 Instance.Register("UDim2")
 

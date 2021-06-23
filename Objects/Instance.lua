@@ -1,6 +1,7 @@
 --- Instance
 -- @module Instance
 
+local expect = require "cc.expect".expect
 
 local Instance = {
   Archivable = false,
