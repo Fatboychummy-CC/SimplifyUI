@@ -6,7 +6,7 @@ local expect = require "cc.expect"
 
 Instance.Register("UDim")
 
-local UDim = {} --- @type UDim
+local UDim = {ClassName = "UDim"} --- @type UDim
 
 --- Add two udims, used for __add operation.
 local function Add(u1, u2)
@@ -42,6 +42,11 @@ function UDim.new(instanceData, scale, offset)
   mt.__add = Add
   mt.__sub = Sub
 
+  function instanceData._internal:Clone()
+    return Instance.new(UDim, self.Scale, self.Offset)
+  end
+
+  instanceData.WRITING = nil
   return instanceData
 end
 
