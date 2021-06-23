@@ -2,7 +2,7 @@
 -- @module[kind=Instance] UDim2
 
 local Instance = require "Objects.Instance"
-local UDim = require "Objects.UDim2"
+local UDim = require "Objects.UDim"
 local expect = require "cc.expect".expect
 
 Instance.Register("UDim2")
@@ -35,7 +35,7 @@ function UDim2.new(instanceData, xScale, xOffset, yScale, yOffset)
 
   -- creating UDim2 directly.
   if type(instanceData) == "number" then
-    return Instance.new(UDim2, instanceData, xScale, sOffset, yScale)
+    return Instance.new(UDim2, instanceData, xScale, xOffset, yScale, yOffset)
   end
 
   -- creating UDim via Instance.new

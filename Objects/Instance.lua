@@ -44,7 +44,7 @@ function Instance.Register(class, inherits)
   expect(1, class, "string")
   expect(2, inherits, "table", "nil")
 
-  Instances[class] = inherits and inherits or {}
+  Instance.Instances[class] = inherits and inherits or {}
 end
 
 function Instance.CloneMetaTable()
@@ -61,7 +61,7 @@ function Instance.CloneMetaTable()
       if Instance[idx] then return Instance[idx] end
 
       -- Check through the Instance's inheritance tree.
-      local inheritance = Instances[self._proxy.Class]
+      local inheritance = Instance.Instances[self._proxy.Class]
       if inheritance then
         for i = 1, #inheritance do
           if inheritance[i][idx] then return inheritance[i][idx] end
