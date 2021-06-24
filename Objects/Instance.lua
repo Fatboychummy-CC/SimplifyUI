@@ -172,12 +172,10 @@ end
 --- This function destroys all of an Instance’s children.
 function Instance:ClearAllChildren()
   expect(1, self, "table")
-
-  for i = 1, #self.Children do
-    self.Children[i]:Destroy()
+  
+  while self.Children[1] do
+    self.Children[1]:Destroy()
   end
-
-  self.Children = {}
 end
 
 
@@ -191,13 +189,11 @@ end
 function Instance:Destroy()
   expect(1, self, "table")
 
-  if self.Parent then
-    -- remove self from parent children table
-    self.Parent.Children[self] = nil
-  end
   self.Parent = nil
 
   self:ClearAllChildren()
+
+  setmetatable(self, nil)
 
   self._internal.Destroy(self)
 end
