@@ -172,7 +172,7 @@ end
 --- This function destroys all of an Instance’s children.
 function Instance:ClearAllChildren()
   expect(1, self, "table")
-  
+
   while self.Children[1] do
     self.Children[1]:Destroy()
   end
@@ -333,11 +333,18 @@ function Instance:GetActor()
 end
 
 --- Returns an array containing all of the Instance's children.
--- @treturn {Instance, ...} The Instance's children.
+-- @treturn {Instance, ...} A copy of the table of this Instance's children.
 function Instance:GetChildren()
   expect(1, self, "table")
 
-  return self.Children
+  local t = {}
+  local proxy = self.Children._proxy
+
+  for i = 1, #proxy do
+    t[i] = proxy[i]
+  end
+
+  return t
 end
 
 --- Returns a string describing the Instance's ancestry.
