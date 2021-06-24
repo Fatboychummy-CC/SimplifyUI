@@ -38,22 +38,6 @@ cctest.newSuite "TestInstance"
       return data
     end
 
-    --[[
-      local AllInstances = {
-        IsInstance = true,
-        Archivable = true,
-        ClassName = class.ClassName,
-        Name = class.ClassName,
-        Children = setmetatable({_proxy = {}}, childrenMetaTable),
-        _proxy = {
-          Parent = Instance.INSTANCE_ROOT,
-          Class = class
-        },
-        WRITING = true,
-        _internal = {}
-      }
-    ]]
-
     local classObject
     EXPECT_NO_THROW(function() classObject = Instance.new(fakeClass, argData) end)
     EXPECT_TYPE(classObject, "table")
@@ -68,7 +52,7 @@ cctest.newSuite "TestInstance"
     EXPECT_TYPE(classObject._internal, "table")
 
     EXPECT_NO_THROW(function() classObject.Value = 32 end)
-    
+
     classObject.WRITING = nil
 
     EXPECT_THROW_ANY_ERROR(function() classObject.Value2 = 32 end)
