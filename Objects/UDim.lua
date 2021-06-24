@@ -4,9 +4,9 @@
 local Instance = require "Objects.Instance"
 local expect = require "cc.expect".expect
 
-Instance.Register("UDim")
 
 local UDim = {ClassName = "UDim"} --- @type UDim
+Instance.Register(UDim)
 
 --- Add two udims, used for __add operation.
 local function Add(u1, u2)

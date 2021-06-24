@@ -38,10 +38,10 @@ function childrenMetaTable:__newindex(idx, value)
 end
 
 --- Register a new instance type, for IsA.
--- @tparam table class The class to be registered.
--- @tparam table|nil inherits The classes this class inherits from.
+-- @tparam Instance class The class to be registered.
+-- @tparam {Instance, ...}|nil inherits The classes this class inherits from.
 function Instance.Register(class, inherits)
-  expect(1, class, "string")
+  expect(1, class, "table")
   expect(2, inherits, "table", "nil")
 
   Instance.Instances[class] = inherits and inherits or {}
