@@ -1,7 +1,6 @@
-local Framework = require "Framework"
 local Actor = require "Objects.Actor"
 
-Framework.newSuite "TestActor"
+cctest.newSuite "TestActor"
   "N_OK" (function()
     ASSERT_NO_THROW(Actor.Clear)
     ASSERT_EQ(Actor.GetN(), 0)
