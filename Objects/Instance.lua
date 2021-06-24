@@ -47,6 +47,12 @@ function Instance.Register(class, inherits)
   Instance.Instances[class] = inherits and inherits or {}
 end
 
+function Instance.DeRegister(class)
+  expect(1, class, "table")
+  
+  Instance.Instances[class] = nil
+end
+
 function Instance.CloneMetaTable()
   return {
     __pairs = function()
@@ -72,27 +78,33 @@ function Instance.CloneMetaTable()
       error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
     end,
     __newindex = function(self, idx, value)
-      if self.WRITING then
+      if rawget(self, "WRITING") then
         rawset(self, idx, value)
       else
         if idx == "Parent" then
           if type(value) ~= "table" and value ~= nil  then
             error(string.format("Invalid argument #3 (Instance or nil expected, got %s)", type(value)), 2)
           end
-          if not value.IsInstance then
-            error("Invalid argument #3 (Instance or nil expected, got table)", 2)
+          if type(value) == "table" then
+            if not value.IsInstance then
+              error("Invalid argument #3 (Instance or nil expected, got table)", 2)
+            end
+
+            -- Tell the children metatable of the current parent to remove this value.
+            if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
+              self._proxy.Parent.Children[value] = nil
+            end
+
+            -- set the new parent
+            self._proxy.Parent = value
+
+            -- tell the children metatable of the new parent to add this as a child.
+            value.Children[self] = true
+          else
+            -- must be nil, tell parent to remove ourself from list of children
+            self._proxy.Parent.Children[self] = nil
+            self._proxy.Parent = Instance.INSTANCE_ROOT
           end
-
-          -- Tell the children metatable of the parent to remove this value.
-          if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
-            self._proxy.Parent.Children[value] = nil
-          end
-
-          -- set the new parent
-          self._proxy.Parent = value and value
-
-          -- tell the children metatable of the new parent to add this as a child.
-          value.Children[self] = true
         else
           error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
         end
@@ -101,22 +113,25 @@ function Instance.CloneMetaTable()
   }
 end
 
+
+local function incomplete(field)
+  return string.format("Attempt to create incomplete Instance (missing field '%s')", field)
+end
 --- Create an instance.
 -- @tparam table self The object to be created. The most notable change from Roblox Instance to these Instances are that these Instance take the `require`d object instead of a string name.
 -- @treturn table the object created.
 function Instance.new(class, ...)
   expect(1, class, "table")
 
-  if not class.new or class == Instance then
-    error(
-      string.format(
-        "Unable to create an Instance of type \"%s\"",
-        class.ClassName and class.ClassName or "Unknown"
-      )
-    )
+  if class == Instance then
+    error("Unable to create Instance of Instance.", 2)
   end
-
-
+  if not class.new then
+    error(incomplete("new"), 2)
+  end
+  if not class.ClassName then
+    error(incomplete("ClassName"), 2)
+  end
 
   local AllInstances = {
     IsInstance = true,
@@ -147,6 +162,10 @@ function Instance:Clone()
     error("Cannot clone Instance.", 2)
   end
 
+  if not self._internal.Clone then
+    error(string.format("Unable to clone Instance \"%s\" due to missing method \"_internal.Clone\"", self.ClassName), 2)
+  end
+
   return self._internal.Clone(self)
 end
 
@@ -173,8 +192,8 @@ function Instance:Destroy()
   expect(1, self, "table")
 
   if self.Parent then
-    local index = find(self.Parent.Children, self)
-    table.remove(self.Parent.Children, index)
+    -- remove self from parent children table
+    self.Parent.Children[self] = nil
   end
   self.Parent = nil
 
