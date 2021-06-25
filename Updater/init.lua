@@ -249,6 +249,7 @@ local function DownloadFiles(downloadData, numWorkers)
       while true do -- spinny spinny until all done.
         os.sleep(0.25)
         drawIndex = (drawIndex + 1) % #drawOrder
+        os.queueEvent("worker_update")
 
         if allDone then return end
       end
