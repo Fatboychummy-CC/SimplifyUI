@@ -122,7 +122,7 @@ local function DownloadFiles(downloadData, numWorkers)
 
       -- set message
       worker.hasChanged = true
-      worker.message = string.format("Downloading %s", remote)
+      worker.message = string.format("Downloading %s", current.FileLocation)
       workerCheckpoint()
 
       -- Get the file
