@@ -189,7 +189,7 @@ local function DownloadFiles(downloadData, numWorkers)
   for i = 1, numWorkers do
     workers[i] = {
       message = "Idle.",
-      positionY = y - 6 + i,
+      positionY = y - numWorkers + 2 + i,
       id = i,
       hasChanged = true,
       errored = false,
