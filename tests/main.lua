@@ -4,5 +4,8 @@ local cctest = require "Framework"
 _G.cctest = cctest
 
 require "TestActor"
+require "TestInstance"
+require "TestUDim"
+require "TestUDim2"
 
 cctest.runAllTests(...)
