@@ -116,7 +116,9 @@ local function DownloadFiles(downloadData, numWorkers)
       -- There was a file available, download it.
       -- Check if there's a remote location
       local remote = current.RemoteLocation
-      if not remote then remote = current.FileLocation end -- if not, default to file location
+      if not remote then
+        remote = downloadData.RemoteLocation .. "/" .. current.FileLocation
+      end -- if not, default to file location
 
       -- set message
       worker.hasChanged = true
@@ -124,7 +126,7 @@ local function DownloadFiles(downloadData, numWorkers)
       workerCheckpoint()
 
       -- Get the file
-      local handle, err = http.get(downloadData.RemoteLocation .. "/" .. remote)
+      local handle, err = http.get(remote)
       if handle then -- success!
         local data = handle.readAll() -- read the data
         handle.close()
