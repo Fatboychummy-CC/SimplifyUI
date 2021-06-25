@@ -255,7 +255,7 @@ local function DownloadFiles(downloadData, numWorkers)
   )
 
   term.setCursorPos(1, y) print()
-  print("Done. Downloaded files to /directory/*")
+  print(string.format("Done. Downloaded files to /%s/*", selfDir))
 end
 
 --- Do an update, deleting unnecessary files and grabbing new files.
