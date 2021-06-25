@@ -123,12 +123,12 @@ local function DownloadFiles(downloadData, numWorkers)
         -- attempt to write 5 times.
         for i = 1, 5 do
           -- change message to writing
-          worker.message = string.format("Writing to %s", current.FileLocation)
+          worker.message = string.format("Writing: %s", fs.combine(selfDir, downloadData.FolderLocation, current.FileLocation))
           worker.hasChanged = true
           workerCheckpoint()
 
           -- Attempt to write the file.
-          local ok, err = WriteFile(fs.combine(selfDir, current.FileLocation), data)
+          local ok, err = WriteFile(fs.combine(selfDir, downloadData.FolderLocation, current.FileLocation), data)
 
           -- If we succeeded, exit this loop.
           if ok then
