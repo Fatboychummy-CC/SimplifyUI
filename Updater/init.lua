@@ -1,5 +1,6 @@
-local _, selfDir = ...
-selfDir = fs.getDir(selfDir)
+local expect = require "cc.expect".expect
+
+local selfDir = fs.getDir(shell.getRunningProgram())
 
 print("Downloader system running in directory", selfDir)
 
@@ -9,7 +10,7 @@ package.path = string.format(
   selfDir, selfDir
 )
 local downloadDataFile = fs.combine(selfDir, "DownloadData")
-local remoteFallBack = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/Development/Downloader/UpdateData"
+local remoteFallBack = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/Development/Updater/UpdateData"
 
 local function WriteFile(fileLocation, data)
   local handle, err = io.open(fileLocation, 'w')
@@ -36,7 +37,7 @@ local function GetData()
 
     data = textutils.unserialize(data)
 
-    remoteLocation = fs.combine(data.RemoteLocation, data.RemoteDataLocation)
+    remoteLocation = data.RemoteLocation .. "/" .. data.RemoteDataLocation
   else
     -- if it doesn't exist, use the fallback
     remoteLocation = remoteFallBack
@@ -48,13 +49,18 @@ local function GetData()
     local data2 = handle2.readAll() -- get its data
     handle2.close()
     return textutils.unserialize(data2) -- return the data
+  else
+    error(string.format("Failed to get %s: %s", remoteLocation, err))
   end
 end
 
 local function DrawWorker(worker)
   term.setCursorPos(1, worker.positionY)
   term.clearLine()
-  term.write("Worker " .. worker.id .. ": " .. worker.message)
+  term.write(string.format("Worker %d: ", worker.id))
+  if worker.errored then term.setTextColor(colors.red) end
+  term.write(worker.message)
+  term.setTextColor(colors.white)
 end
 
 local function Progress(c, m, len)
@@ -68,6 +74,9 @@ end
 -- @tparam table downloadData The data from GetData.
 -- @tparam number numWorkers The number of workers to use.
 local function DownloadFiles(downloadData, numWorkers)
+  expect(1, downloadData, "table")
+  expect(2, numWorkers, "number", "nil")
+
   numWorkers = numWorkers or 1
   local downloadQueue = {} -- queue that the workers pull from when ready.
   local workers = {} -- array of workers.
@@ -115,7 +124,7 @@ local function DownloadFiles(downloadData, numWorkers)
       workerCheckpoint()
 
       -- Get the file
-      local handle, err = http.get(fs.combine(downloadData.RemoteLocation, remote))
+      local handle, err = http.get(downloadData.RemoteLocation .. "/" .. remote))
       if handle then -- success!
         local data = handle.readAll() -- read the data
         handle.close()
@@ -123,12 +132,12 @@ local function DownloadFiles(downloadData, numWorkers)
         -- attempt to write 5 times.
         for i = 1, 5 do
           -- change message to writing
-          worker.message = string.format("Writing: %s", fs.combine(selfDir, downloadData.FolderLocation, current.FileLocation))
+          worker.message = string.format("Writing: %s", fs.combine(selfDir, current.FileLocation))
           worker.hasChanged = true
           workerCheckpoint()
 
           -- Attempt to write the file.
-          local ok, err = WriteFile(fs.combine(selfDir, downloadData.FolderLocation, current.FileLocation), data)
+          local ok, err = WriteFile(fs.combine(selfDir, current.FileLocation), data)
 
           -- If we succeeded, exit this loop.
           if ok then
@@ -194,7 +203,6 @@ local function DownloadFiles(downloadData, numWorkers)
   -- Run all functions in parallel.
   parallel.waitForAll(
     function()
-      local total =
       for i = 1, #workers do DrawWorker(workers[i]) end
 
       os.sleep(1)
@@ -256,7 +264,7 @@ local function DoUpdate()
 end
 
 return {
-  DoUpdate = DoUpdate
+  DoUpdate = DoUpdate,
   DownloadFiles = DownloadFiles,
   GetData = GetData
 }
