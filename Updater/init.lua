@@ -124,7 +124,7 @@ local function DownloadFiles(downloadData, numWorkers)
       workerCheckpoint()
 
       -- Get the file
-      local handle, err = http.get(downloadData.RemoteLocation .. "/" .. remote))
+      local handle, err = http.get(downloadData.RemoteLocation .. "/" .. remote)
       if handle then -- success!
         local data = handle.readAll() -- read the data
         handle.close()
