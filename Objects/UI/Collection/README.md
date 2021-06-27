@@ -1,41 +1,41 @@
 # What is this?
-This file explains the specifications of all `Collection` objects and sub-objects.
+This file explains the specifications of all [`Collection`](#Collection) objects and sub-objects.
 
 # Introduction
 [`Collection`](#Collection) objects are objects which describe different aspects of a UI object, from how the corners look to how each side looks, and what the body of the object looks like.
 
-## `Collection`
-A `Collection` is a combination of any number of `Background`s, `Corner`s, `Edge`s, and up to one `Animation` (per attachment).
+## Collection
+A [`Collection`](#Collection) is a combination of any number of [`Background`](#Background)s, [`Corner`](#Corner)s, [`Edge`](#Edge)s, and up to one [`Animation`](#Animation) (per attachment).
 
 # Specifications
 
 ## `Collection`
-A `Collection` is an `Instance`.
+A [`Collection`](#Collection) is an `Instance`.
 
-Each `Collection` object has the following properties (excluding those inherited from `Instance`):
-* `Body: table[CollectionItem]`: A list of `CollectionItem`s, ordered in the order of drawing. The item at `Body[1]` is drawn before `Body[2]`.
-* `Transparent: boolean`: Determines whether this `Collection` is drawn. When `true`, calling `Collection:Draw()` will not draw the `Collection`.
-* `Position: UDim2`: Describes the position relative to the parent object (or the terminal, if no parent) of this `Collection`.
-* `ActualPosition: UDim2`: Describes the actual position relative to the terminal of this `Collection`, only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
-* `Size: UDim2`: Describes the size relative to the parent object (or the terminal, if no parent) of this `Collection`
-* `ActualSize: UDim2`: Describes the actual size relative to the terminal of this `Collection`, only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
+Each [`Collection`](#Collection) object has the following properties (excluding those inherited from `Instance`):
+* `Body: table[CollectionItem]`: A list of [`CollectionItem`](#CollectionItem)s, ordered in the order of drawing. The item at `Body[1]` is drawn before `Body[2]`.
+* `Transparent: boolean`: Determines whether this [`Collection`](#Collection) is drawn. When `true`, calling `Collection:Draw()` will not draw the [`Collection`](#Collection).
+* `Position: UDim2`: Describes the position relative to the parent object (or the terminal, if no parent) of this [`Collection`](#Collection).
+* `ActualPosition: UDim2`: Describes the actual position relative to the terminal of this [`Collection`](#Collection), only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
+* `Size: UDim2`: Describes the size relative to the parent object (or the terminal, if no parent) of this [`Collection`](#Collection)
+* `ActualSize: UDim2`: Describes the actual size relative to the terminal of this [`Collection`](#Collection), only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
 
-Each `Collection` object has the following methods:
-* `Draw()`: Simply draws the `Collection`, also calling `Collection:Update()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
-* `Update()`: Resizes the object's `Background`s, `Corner`s, and `Edge`s to the object's specifications, also calling `Collection:Update()` on all children.
-  * Contrary to the UI objects in Roblox, the `Collection` is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
-* `AddCollectionItem(CollectionItem)`: Adds a new `CollectionItem` at the back of `Collection.Body`.
+Each [`Collection`](#Collection) object has the following methods:
+* `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Update()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
+* `Update()`: Resizes the object's [`Background`](#Background)s, [`Corner`](#Corner)s, and [`Edge`](#Edge)s to the object's specifications, also calling `Collection:Update()` on all children.
+  * Contrary to the UI objects in Roblox, the [`Collection`](#Collection) is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
+* `AddCollectionItem(CollectionItem)`: Adds a new [`CollectionItem`](#CollectionItem) at the back of `Collection.Body`.
 
-## `CollectionItem`:
-A `CollectionItem` is not a full object, however there are other objects which derive from `CollectionItem`.
+## `CollectionItem`
+A [`CollectionItem`](#CollectionItem) is not a full object, however there are other objects which derive from [`CollectionItem`](#CollectionItem).
 
-The following objects derive from `CollectionItem`:
-* `Background`
+The following objects derive from [`CollectionItem`](#CollectionItem):
+* [`Background`](#Background)
 * `Side`
-* `Corner`
-* `Animation`
+* [`Corner`](#Corner)
+* [`Animation`](#Animation)
 
-Each of the `CollectionItem` objects have the following methods/properties:
+Each of the [`CollectionItem`](#CollectionItem) objects have the following methods/properties:
 * `Draw(Position: UDim2, Scale: UDim2)`: Draws the object, given the position and scale.
 * `BGColo[u]r: color`: The color used for the background of this object.
 * `FGColo[u]r: color`: The color used for the foreground of this object (textColo[u]r).
@@ -48,7 +48,7 @@ Each of the `CollectionItem` objects have the following methods/properties:
 ## `Corner`
 
 ### Properties
-* `Corner: CornerPosition`: The actual corner this `Corner` object is attached to.
+* `Corner: CornerPosition`: The actual corner this [`Corner`](#Corner) object is attached to.
 * `Size: number`: The square size of this object.
 * `PositionOffset: UDim2 [default=UDim2[0, 0, 0, 0]]`: The position offset of this object on each corner.
   * By default, corners are positioned so the corners are "sticking out" of the side of the object, like so:
@@ -87,8 +87,8 @@ A `SidePosition` is an Enum, values are:
 * `BOTTOM: 3`
 * `LEFT: 4`
 
-## `Animation`s
-`Animation`s are a special `CollectionItem` that adds a bit of flare to a `Collection`.
+## `Animation`
+[`Animation`](#Animation)s are a special [`CollectionItem`](#CollectionItem) that adds a bit of flare to a [`Collection`](#Collection).
 
 ### Methods:
 * `Tick()`: Advances the animation forward by a frame using the `Animation.Animator` function.
@@ -96,7 +96,7 @@ A `SidePosition` is an Enum, values are:
 * `Stop()`: Stops the animation.
 
 ### Properties:
-* `Attachment: CollectionItem`: Attaches the animation to the selected `CollectionItem`.
-  * `CollectionItem` usage is enforced by `Instance:IsA`.
-  * Cannot attach an `Animation` to another `Animation`.
+* `Attachment: CollectionItem`: Attaches the animation to the selected [`CollectionItem`](#CollectionItem).
+  * [`CollectionItem`](#CollectionItem) usage is enforced by `Instance:IsA`.
+  * Cannot attach an [`Animation`](#Animation) to another [`Animation`](#Animation).
 * `Animator: function(self, Parent)`: The function called every tick.
