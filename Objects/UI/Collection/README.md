@@ -24,7 +24,7 @@ A [`Collection`](#Collection) is an `Instance`.
 * `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Update()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
 * `Update()`: Updates this object's `ActualPosition` and `ActualSize` values in regards to the parent, also calling `Collection:Update()` on all children.
   * Contrary to the UI objects in Roblox, the [`Collection`](#Collection) is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
-* `AddCollectionItem(CollectionItem)`: Adds a new [`CollectionItem`](#CollectionItem) at the back of `Collection.Body`.
+* `AddCollectionItem(`[`CollectionItem`](#CollectionItem)`)`: Adds a new [`CollectionItem`](#CollectionItem) at the back of `Collection.Body`.
 
 ## `CollectionItem`
 A [`CollectionItem`](#CollectionItem) is not a full object, however there are other objects which derive from [`CollectionItem`](#CollectionItem).
