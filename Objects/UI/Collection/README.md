@@ -4,7 +4,7 @@ This file explains the specifications of all [`Collection`](#Collection) objects
 # Introduction
 [`Collection`](#Collection) objects are objects which describe different aspects of a UI object, from how the corners look to how each side looks, and what the body of the object looks like.
 
-## Collection
+## The Collection
 A [`Collection`](#Collection) is a combination of any number of [`Background`](#Background)s, [`Corner`](#Corner)s, [`Edge`](#Edge)s, and up to one [`Animation`](#Animation) (per attachment).
 
 # Specifications
