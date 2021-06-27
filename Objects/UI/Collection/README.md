@@ -12,7 +12,7 @@ A [`Collection`](#Collection) is a combination of any number of [`Background`](#
 ## `Collection`
 A [`Collection`](#Collection) is an `Instance`.
 
-Each [`Collection`](#Collection) object has the following properties (excluding those inherited from `Instance`):
+### Properties (excluding those inherited from `Instance`)
 * `Body: table[CollectionItem]`: A list of [`CollectionItem`](#CollectionItem)s, ordered in the order of drawing. The item at `Body[1]` is drawn before `Body[2]`.
 * `Transparent: boolean`: Determines whether this [`Collection`](#Collection) is drawn. When `true`, calling `Collection:Draw()` will not draw the [`Collection`](#Collection).
 * `Position: UDim2`: Describes the position relative to the parent object (or the terminal, if no parent) of this [`Collection`](#Collection).
@@ -20,7 +20,7 @@ Each [`Collection`](#Collection) object has the following properties (excluding 
 * `Size: UDim2`: Describes the size relative to the parent object (or the terminal, if no parent) of this [`Collection`](#Collection)
 * `ActualSize: UDim2`: Describes the actual size relative to the terminal of this [`Collection`](#Collection), only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
 
-Each [`Collection`](#Collection) object has the following methods:
+### Methods (excluding those inherited from `Instance`)
 * `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Update()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
 * `Update()`: Resizes the object's [`Background`](#Background)s, [`Corner`](#Corner)s, and [`Edge`](#Edge)s to the object's specifications, also calling `Collection:Update()` on all children.
   * Contrary to the UI objects in Roblox, the [`Collection`](#Collection) is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
@@ -29,14 +29,16 @@ Each [`Collection`](#Collection) object has the following methods:
 ## `CollectionItem`
 A [`CollectionItem`](#CollectionItem) is not a full object, however there are other objects which derive from [`CollectionItem`](#CollectionItem).
 
-The following objects derive from [`CollectionItem`](#CollectionItem):
+### Objects which derive from [`CollectionItem`](#CollectionItem):
 * [`Background`](#Background)
-* `Side`
+* [`Edge`](#Edge)
 * [`Corner`](#Corner)
 * [`Animation`](#Animation)
 
-Each of the [`CollectionItem`](#CollectionItem) objects have the following methods/properties:
+### Methods
 * `Draw(Position: UDim2, Scale: UDim2)`: Draws the object, given the position and scale.
+
+### Properties
 * `BGColo[u]r: color`: The color used for the background of this object.
 * `FGColo[u]r: color`: The color used for the foreground of this object (textColo[u]r).
 
@@ -71,17 +73,17 @@ A `CornerPosition` is an Enum, values are:
 * `BOTTOM_LEFT: 3`
 * `BOTTOM_RIGHT: 4`
 
-## `Side`
+## `Edge`
 
 ### Properties
-* `Side: SidePosition`: The actual side this `Side` object is attached to.
-* `Character: char`: The character to be repeated across the side.
+* `Edge: EdgePosition`: The actual edge this [`Edge`](#Edge) object is attached to.
+* `Character: char`: The character to be repeated across the edge.
 * `IsDashed: boolean [default=false]`:
 * `DashLength: number [default=1]`: If `IsDashed` is true, this number will be checked for the length of each "dash".
-  * If the DashLength is even and the length of the side is odd (or vice-versa), the center dash of the side will either be longer or shorter to compensate.
+  * If the DashLength is even and the length of the edge is odd (or vice-versa), the center dash of the edge will either be longer or shorter to compensate.
 
-#### `SidePosition`
-A `SidePosition` is an Enum, values are:
+#### `EdgePosition`
+A `EdgePosition` is an Enum, values are:
 * `TOP: 1`
 * `RIGHT: 2`
 * `BOTTOM: 3`
