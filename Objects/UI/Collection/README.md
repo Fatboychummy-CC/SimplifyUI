@@ -22,7 +22,7 @@ A [`Collection`](#Collection) is an `Instance`.
 
 ### Methods (excluding those inherited from `Instance`)
 * `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Update()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
-* `Update()`: Resizes the object's [`Background`](#Background)s, [`Corner`](#Corner)s, and [`Edge`](#Edge)s to the object's specifications, also calling `Collection:Update()` on all children.
+* `Update()`: Updates this object's `ActualPosition` and `ActualSize` values in regards to the parent, also calling `Collection:Update()` on all children.
   * Contrary to the UI objects in Roblox, the [`Collection`](#Collection) is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
 * `AddCollectionItem(CollectionItem)`: Adds a new [`CollectionItem`](#CollectionItem) at the back of `Collection.Body`.
 
