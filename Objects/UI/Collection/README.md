@@ -13,7 +13,7 @@ A `Collection` is a combination of any number of `Background`s, `Corner`s, `Edge
 A `Collection` is an `Instance`.
 
 Each `Collection` object has the following properties (excluding those inherited from `Instance`):
-* `Body: table[CollectionItem]`: A list of `CollectionItem`s,
+* `Body: table[CollectionItem]`: A list of `CollectionItem`s, ordered in the order of drawing. The item at `Body[1]` is drawn before `Body[2]`.
 * `Transparent: boolean`: Determines whether this `Collection` is drawn. When `true`, calling `Collection:Draw()` will not draw the `Collection`.
 * `Position: UDim2`: Describes the position relative to the parent object (or the terminal, if no parent) of this `Collection`.
 * `ActualPosition: UDim2`: Describes the actual position relative to the terminal of this `Collection`, only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
