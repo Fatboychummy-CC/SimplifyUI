@@ -21,7 +21,7 @@ A [`Collection`](#Collection) is an `Instance`.
 * `ActualSize: UDim2`: Describes the actual size relative to the terminal of this [`Collection`](#Collection), only updated when `Collection:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
 
 ### Methods (excluding those inherited from `Instance`)
-* `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Update()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
+* `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Draw()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
 * `Update()`: Updates this object's `ActualPosition` and `ActualSize` values in regards to the parent, also calling `Collection:Update()` on all children.
   * Contrary to the UI objects in Roblox, the [`Collection`](#Collection) is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
 * `AddCollectionItem(CollectionItem)`: Adds a new [`CollectionItem`](#CollectionItem) at the back of `Collection.Body`.
