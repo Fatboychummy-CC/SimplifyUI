@@ -37,10 +37,13 @@ A [`CollectionItem`](#CollectionItem) is not a full object, however there are ot
 
 ### Methods
 * `Draw(Position: UDim2, Scale: UDim2)`: Draws the object, given the position and scale.
+* `SetTextColor(color)`: Sets the text colo[u]r.
+* `SetBackgroundColor(color)`: Sets the background colo[u]r.
 
 ### Properties
-* `BGColo[u]r: color`: The color used for the background of this object.
-* `FGColo[u]r: color`: The color used for the foreground of this object (textColo[u]r).
+* `BackGroundColo[u]r: color`: The color used for the background of this object.
+* `TextColo[u]r: color`: The color used for the foreground of this object.
+  * It is not recommended to set these manually, but if you do: The `Color` spelling is used internally.
 
 ## `Background`
 
@@ -50,7 +53,7 @@ A [`CollectionItem`](#CollectionItem) is not a full object, however there are ot
 ## `Corner`
 
 ### Properties
-* `Corner: CornerPosition`: The actual corner this [`Corner`](#Corner) object is attached to.
+* `Corners: table[CornerPosition]`: The corners this [`Corner`](#Corner) object is attached to.
 * `Size: number`: The square size of this object.
 * `PositionOffset: UDim2 [default=UDim2[0, 0, 0, 0]]`: The position offset of this object on each corner.
   * By default, corners are positioned so the corners are "sticking out" of the side of the object, like so:
@@ -76,7 +79,7 @@ A `CornerPosition` is an Enum, values are:
 ## `Edge`
 
 ### Properties
-* `Edge: EdgePosition`: The actual edge this [`Edge`](#Edge) object is attached to.
+* `Edges: table[EdgePosition]`: The edges this [`Edge`](#Edge) object is attached to.
 * `Character: char`: The character to be repeated across the edge.
 * `IsDashed: boolean [default=false]`:
 * `DashLength: number [default=1]`: If `IsDashed` is true, this number will be checked for the length of each "dash".
