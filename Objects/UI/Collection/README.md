@@ -1,8 +1,8 @@
 # What is this?
-This file explains the specifications of all Collection objects.
+This file explains the specifications of all `Collection` objects and sub-objects.
 
 # Introduction
-Collection objects are objects which describe different aspects of a UI object.
+`Collection` objects are objects which describe different aspects of a UI object, from how the corners look to how each side looks, and what the body of the object looks like.
 
 ## `Collection`
 A `Collection` is a combination of any number of `Background`s, `Corner`s, `Edge`s, and up to one `Animation`.
