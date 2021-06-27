@@ -48,7 +48,8 @@ A [`CollectionItem`](#CollectionItem) is not a full object, however there are ot
 ## `Background`
 
 ### Properties
-* `Character: char [default=' ']`: The character used for the background.
+* `Body: char [default=' ']`: The character used for the background.
+  * In the future, `UIImage`s will be able to be used as a background as well.
 
 ## `Corner`
 
