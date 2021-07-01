@@ -40,7 +40,7 @@ This object displays text.
 
 #### Properties (Excluding those inherited from [`UIObject`](#UIObject))
 * `Text: string[default = "TextLabel"]`: The string rendered by the UI element.
-* `TextAlign: TextAlign[default = TextAlign.Center]`: The alignment of the text inside this UI element, using the [`TextAlign`](#TextAlign: Enum) enum.
+* `TextAlign: TextAlign[default = TextAlign.Center]`: The alignment of the text inside this UI element, using the [`TextAlign`](#TextAlign-Enum) enum.
 * `TextFits: boolean`: Whether the text fits within the constraints of the [`TextBox`](#TextBox).
 * `TextColor: color[default = colors.white]`: The color of the rendered text.
 * `BackgroundColor: color[default = colors.black]`: The color of the background.
