@@ -16,6 +16,9 @@ By default, a UIObject only defines an area in which *something* will be drawn t
 
 Or alternatively, `Collection` will just become `UIObject`. Not sure yet.
 
+### Static Properties (Properties used by all [`UIObject`](#UIObject)s)
+* `SelectionColor: color[default = colors.cyan]`: The border color used when selecting an object via the keyboard.
+
 ### Properties (Excluding those inherited from `Instance`)
 * `Visible: boolean[default = true]`: Determines whether this [`UIObject`](#UIObject) is drawn. When `false`, calling `UIObject:Draw()` will not draw the [`UIObject`](#UIObject), nor will it draw the [`UIObject`](#UIObject)'s children.
 * `Position: UDim2[default = 0,0,0,0]`: Describes the position relative to the parent object (or the terminal, if no parent) of this [`UIObject`](#UIObject).
@@ -23,7 +26,8 @@ Or alternatively, `Collection` will just become `UIObject`. Not sure yet.
 * `Size: UDim2[default = 0,0,0,0]`: Describes the size relative to the parent object (or the terminal, if no parent) of this [`UIObject`](#UIObject)
 * `AbsoluteSize: UDim2[default = 0,0,0,0]`: Describes the actual size relative to the terminal of this [`UIObject`](#UIObject), only updated when `UIObject:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
 * `NextSelectionRight, NextSelectionLeft, NextSelectionUp, NextSelectionDown: UIObject[default = nil]`: These are used for determining what hitting the arrow-keys will move the `Active` item to.
-* `Selectable: boolean[default = true]`: Determines if a [`UIObject`](#UIObject) is selectable.
+* `Selectable: boolean[default = false]`: Determines if a [`UIObject`](#UIObject) is selectable.
+* `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard. When selected using arrow keys, will display a border around the object using `UIObject.SelectionColor`.
 * `Active: boolean[default = true]`: Controls when a UI element will sink inputs from reaching other elements behind it.
 * `ClipsDescendants: boolean[default = false]`: Determines if descendant [`UIObject`](#UIObject)s are clipped when out of bounds of this object.
 
@@ -50,15 +54,15 @@ This object displays text.
 * `TextWrapped: boolean[default = false]`: Determines if text wraps to multiple lines within the `UIObject`s space, truncating excess text.
 
 ##### TextAlign: Enum
-* `TopLeft = 1`
-* `TopCenter = 2`
-* `TopRight = 3`
-* `CenterLeft = 4`
-* `Center = 5`
-* `CenterRight = 6`
-* `BottomLeft = 7`
+* `TopLeft      = 1`
+* `TopCenter    = 2`
+* `TopRight     = 3`
+* `CenterLeft   = 4`
+* `Center       = 5`
+* `CenterRight  = 6`
+* `BottomLeft   = 7`
 * `BottomCenter = 8`
-* `BottomRight = 9`
+* `BottomRight  = 9`
 
 ### TextBox (inherits from [`TextLabel`](#TextLabel))
 This object contains a `read()`-like window that allows you the user to select it then write to it.
@@ -77,8 +81,29 @@ This object contains a `read()`-like window that allows you the user to select i
 
 This is a base class to [`TextButton`](#TextButton)s and [`ImageButton`](#ImageButton)s.
 
-#### Properties (Excluding those inherited from [`UIObject`](#UIObject))
-* `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard.
+#### Events
+* `Activated(InputObject inputObject, int hitCount)`: Fires when the button is activated (whether it be by keyboard, mouse input, or etc), delaying a quarter-second to count hits (for checking double-clicks/etc).
+* `MouseButton1Click()`: Fired when the mouse fully left-clicks this button.
+* `MouseButton2Click()`: Fired when the mouse fully right-clicks this button.
+* `MouseButton1Down(int x, int y)`: Fired when the left mouse is down on this button.
+* `MouseButton2Down(int x, int y)`: Fired when the right mouse is down on this button.
+* `MouseButton1Up(int x, int y)`: Fired when the left mouse is released on this button.
+* `MouseButton2Up(int x, int y)`: Fired when the right mouse  is released on this button.
+
+##### InputObject
+A more basic version of Roblox's `InputObject`
+
+###### Properties
+* `KeyCode: keys`: If keyboard input, the key that was hit.
+* `UserInputType: UserInputType`: [`UserInputType`](#UserInputType) enum for what type of input was detected.
+
+####### UserInputType: Enum
+* `MouseButton1 = 1`: The left mouse button
+* `MouseButton2 = 2`: The right mouse button
+* `MouseButton3 = 3`: The middle mouise button
+* `MouseWheel   = 4`: Scrolling while hovering over the UI Object.
+* `Keyboard     = 5`: Keyboard input.
+* `TextInput    = 6`: Keyboard input, but input was sank by a text input object (Usually only [`TextBox`](#TextBox)es do this).
 
 ### TextButton
 This object displays text like [`TextLabel`](#TextLabel), but is also clicky like a button.
