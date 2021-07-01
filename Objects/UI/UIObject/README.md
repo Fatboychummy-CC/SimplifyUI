@@ -10,6 +10,8 @@ A [`UIObject`](#UIObject) is something that contains different methods and prope
 # Specifications
 
 ## UIObject
+> NotCreatable
+
 By default, a UIObject only defines an area in which *something* will be drawn to. However, a [`Collection`](#../Collection/README.md#Collection) is a more advanced (and less advanced in some ways) version of a [`UIObject`](#UIObject). Excluding [`Collection`](#../Collection/README.md#Collection)s, a [`UIObject`](#UIObject) does not handle background or borders. You should use a [`Collection`](#../Collection/README.md#Collection) in tandem with these [`UIObject`](#UIObject)s to achieve your desired look.
 
 Or alternatively, `Collection` will just become `UIObject`. Not sure yet.
@@ -62,7 +64,7 @@ This object displays text.
 This object contains a `read()`-like window that allows you the user to select it then write to it.
 
 #### Properties (Excluding those inherited from [`UIObject`](#UIObject) and [`TextLabel`](#TextLabel))
-* None, at the moment.
+* `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard.
 
 
 #### Methods (Excluding those inherited from [`UIObject`](#UIObject) and [`TextLabel`](#TextLabel))
@@ -70,5 +72,13 @@ This object contains a `read()`-like window that allows you the user to select i
 * `IsFocused(): bool`: Returns `true` if the [`TextBox`](#TextBox) is focused, or `false` if not.
 * `ReleaseFocus(bool submitted[default = false])`: Forces the client to unfocus the [`TextBox`](#TextBox). If `submitted` is true, will emulate hitting `keys.enter` before unfocusing the [`TextBox`](#TextBox).
 
+### UIButton
+> NotCreatable
+
+This is a base class to [`TextButton`](#TextButton)s and [`ImageButton`](#ImageButton)s.
+
+#### Properties (Excluding those inherited from [`UIObject`](#UIObject))
+* `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard.
+
 ### TextButton
-This object
+This object displays text like [`TextLabel`](#TextLabel), but is also clicky like a button.
