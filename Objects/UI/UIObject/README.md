@@ -47,11 +47,11 @@ This object displays text.
 #### Properties (Excluding those inherited from [`UIObject`](#UIObject))
 * `Text: string[default = "TextLabel"]`: The string rendered by the UI element.
 * `TextAlign: TextAlign[default = TextAlign.Center]`: The alignment of the text inside this UI element, using the [`TextAlign`](#TextAlign-Enum) enum.
-* `TextFits: boolean`: Whether the text fits within the constraints of the [`TextBox`](#TextBox).
 * `TextColor: color[default = colors.white]`: The color of the rendered text.
 * `BackgroundColor: color[default = colors.black]`: The color of the background.
 * `TextTruncate: boolean[default = false]`: Controls the truncation of the text displayed in this [`TextBox`](#TextBox).
 * `TextWrapped: boolean[default = false]`: Determines if text wraps to multiple lines within the `UIObject`s space, truncating excess text.
+* `TextFits: boolean`: Whether the text fits within the constraints of the [`TextBox`](#TextBox).
 
 ##### TextAlign: Enum
 * `TopLeft      = 1`
@@ -69,7 +69,7 @@ This object contains a `read()`-like window that allows you the user to select i
 
 #### Properties (Excluding those inherited from [`UIObject`](#UIObject) and [`TextLabel`](#TextLabel))
 * `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard.
-
+* `TextScrolled: boolean[default = true]`: If `TextWrapped` is `false`, determines if the [`TextBox`](#TextBox) will scroll similarly to `read()`.
 
 #### Methods (Excluding those inherited from [`UIObject`](#UIObject) and [`TextLabel`](#TextLabel))
 * `CaptureFocus()`: Forces the client to focus on this [`TextBox`](#TextBox), removing focus from any other [`TextBox`](#TextBox)s in the hierarchy.
