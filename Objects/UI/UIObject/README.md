@@ -14,7 +14,7 @@ A [`UIObject`](#UIObject) is something that contains different methods and prope
 
 By default, a UIObject only defines an area in which *something* will be drawn to. However, a [`Collection`](#../Collection/README.md#Collection) is a more advanced (and less advanced in some ways) version of a [`UIObject`](#UIObject). Excluding [`Collection`](#../Collection/README.md#Collection)s, a [`UIObject`](#UIObject) does not handle background or borders. You should use a [`Collection`](#../Collection/README.md#Collection) in tandem with these [`UIObject`](#UIObject)s to achieve your desired look.
 
-Or alternatively, `Collection` will just become `UIObject`. Not sure yet.
+***NOTE: `Collection` may be converted to `UIObject`***
 
 ### Static Properties (Properties used by all [`UIObject`](#UIObject)s)
 * `SelectionColor: color[default = colors.cyan]`: The border color used when selecting an object via the keyboard.
@@ -35,9 +35,9 @@ Or alternatively, `Collection` will just become `UIObject`. Not sure yet.
 ### Methods (Excluding those inherited from `Instance`)
 * `Draw()`: Simply draws the [`UIObject`](#UIObject), also calling `UIObject:Draw()` on all children and `UIObject:Draw()` on all objects in the `Body`.
 * `Update()`: Updates this object's `ActualPosition` and `ActualSize` values in regards to the parent, also calling `UIObject:Update()` on all children.
-* `TweenPosition(UDim2 endPosition, EasingDirection easingDirection, EasingStyle easingStyle, float time, bool override, function callback): bool`: Smoothly move a [`UIObject`](#UIObject) to a new position.
-* `TweenSize(UDim2 endSize, EasingDirection easingDirection, EasingStyle easingStyle, float time, bool override, function callback): bool`: Smoothly resize a [`UIObject`](#UIObject) to a new size.
-* `TweenSizeAndPosition(UDim2 endSize, UDim2 endPosition, EasingDirection easingDirection, EasingStyle easingStyle, float time, bool override, function callback): bool`: Smoothly move a [`UIObject`](#UIObject) to a new position and size.
+* `TweenPosition(UDim2 endPosition, EasingDirection easingDirection, EasingStyle easingStyle, float time, boolean override, function callback): boolean`: Smoothly move a [`UIObject`](#UIObject) to a new position.
+* `TweenSize(UDim2 endSize, EasingDirection easingDirection, EasingStyle easingStyle, float time, boolean override, function callback): boolean`: Smoothly resize a [`UIObject`](#UIObject) to a new size.
+* `TweenSizeAndPosition(UDim2 endSize, UDim2 endPosition, EasingDirection easingDirection, EasingStyle easingStyle, float time, boolean override, function callback): boolean`: Smoothly move a [`UIObject`](#UIObject) to a new position and size.
 
 ## The different types of [`UIObject`](#UIObject)s
 
@@ -73,8 +73,8 @@ This object contains a `read()`-like window that allows you the user to select i
 
 #### Methods (Excluding those inherited from [`UIObject`](#UIObject) and [`TextLabel`](#TextLabel))
 * `CaptureFocus()`: Forces the client to focus on this [`TextBox`](#TextBox), removing focus from any other [`TextBox`](#TextBox)s in the hierarchy.
-* `IsFocused(): bool`: Returns `true` if the [`TextBox`](#TextBox) is focused, or `false` if not.
-* `ReleaseFocus(bool submitted[default = false])`: Forces the client to unfocus the [`TextBox`](#TextBox). If `submitted` is true, will emulate hitting `keys.enter` before unfocusing the [`TextBox`](#TextBox).
+* `IsFocused(): boolean`: Returns `true` if the [`TextBox`](#TextBox) is focused, or `false` if not.
+* `ReleaseFocus(boolean submitted[default = false])`: Forces the client to unfocus the [`TextBox`](#TextBox). If `submitted` is true, will emulate hitting `keys.enter` before unfocusing the [`TextBox`](#TextBox).
 
 ### UIButton
 > NotCreatable
@@ -107,3 +107,27 @@ A more basic version of Roblox's `InputObject`
 
 ### TextButton
 This object displays text like [`TextLabel`](#TextLabel), but is also clicky like a button.
+
+Inherits from both [`TextLabel`](#TextLabel) and [`UIButton`](#UIButton)
+
+### ImageLabel
+An image-in-a-box.
+
+#### Properties
+* `Image: content`: The image to be displayed, formatted as a `paintutils` image.
+* `ScaleType: ScaleType[default = ScaleType.Crop]`: Determines how the image will be scaled if displayed in a UI element which differs in size, using the [`ScaleType`](#ScaleType-Enum) enum.
+
+##### ScaleType: Enum
+* `Stretch = 1`: The image is stretched to fit in both `X` and `Y` dimensions to fit the image.
+* `Tile    = 2`: The image is tiled inside of the element.
+* `Fit     = 3`: The image is scaled up until either `X` or `Y` dimension is equal to the size of the element.
+* `Crop    = 4`: The image is cropped to fit inside the element.
+
+### ImageButton
+An image, but also a button!
+
+Inherits from [`UIButton`](#UIButton) and [`ImageLabel`](#ImageLabel)
+
+#### Properties
+* `PressedImage: content`: The image that will be drawn when an [`ImageButton`](#ImageButton) is pressed.
+* `TileCount: UDim2[default = 0,1,0,1]`: The amount to tile the image in each direction, if `ScaleType.Tile` is selected.
