@@ -2,7 +2,7 @@
 This file explains the specifications of all [`Collection`](#Collection) objects and sub-objects.
 
 # Introduction
-[`Collection`](#Collection) objects are objects which describe different aspects of a UI object, from how the corners look to how each side looks, and what the body of the object looks like.
+[`Collection`](#Collection) objects are objects add on to a simple UI object with different "descriptions", from how the corners look to how each side looks, and what the body of the object looks like.
 
 ## The Collection
 A [`Collection`](#Collection) is a combination of any number of [`Background`](#Background)s, [`Corner`](#Corner)s, [`Edge`](#Edge)s, and up to one [`Animation`](#Animation) (per attachment).
@@ -10,14 +10,12 @@ A [`Collection`](#Collection) is a combination of any number of [`Background`](#
 # Specifications
 
 ## `Collection`
-A [`Collection`](#Collection) is an `Instance`, more specifically, a `UIObject`.
+A [`Collection`](#Collection) is an `Instance`, more specifically, a [`UIObject`](../UIObject/README.md#UIObject).
 
-### Properties (excluding those inherited from `Instance` and `UIObject`)
+### Properties (excluding those inherited from `Instance` and [`UIObject`](../UIObject/README.md#UIObject))
 * `Body: table[CollectionItem]`: A list of [`CollectionItem`](#CollectionItem)s, ordered in the order of drawing. The item at `Body[1]` is drawn before `Body[2]`.
 
 ### Methods (excluding those inherited from `Instance`)
-* `Draw()`: Simply draws the [`Collection`](#Collection), also calling `Collection:Draw()` on all children and `CollectionItem:Draw()` on all objects in the `Body`.
-* `Update()`: Updates this object's `ActualPosition` and `ActualSize` values in regards to the parent, also calling `Collection:Update()` on all children.
   * Contrary to the UI objects in Roblox, the [`Collection`](#Collection) is not updated when `Position` or `Size` is updated. You *must* call this method to get the updated values.
   * It is recommended to `:Update()` the "topmost" parent, so changes to all ancestors will propagate correctly.
 * `AddCollectionItem(CollectionItem)`: Adds a new [`CollectionItem`](#CollectionItem) at the back of `Collection.Body`.
