@@ -21,10 +21,12 @@ By default, a UIObject only defines an area in which *something* will be drawn t
 
 ### Properties (Excluding those inherited from `Instance`)
 * `Visible: boolean[default = true]`: Determines whether this [`UIObject`](#UIObject) is drawn. When `false`, calling `UIObject:Draw()` will not draw the [`UIObject`](#UIObject), nor will it draw the [`UIObject`](#UIObject)'s children.
+* `AnchorPoint: UDim2[default = 0,0,0,0]`: Determines the origin point of this [`UIObject`](#UIObject).
 * `Position: UDim2[default = 0,0,0,0]`: Describes the position relative to the parent object (or the terminal, if no parent) of this [`UIObject`](#UIObject).
-* `AbsolutePosition: UDim2[default = 0,0,0,0]`: Describes the actual position relative to the terminal of this [`UIObject`](#UIObject), only updated when `UIObject:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
+* `AbsolutePosition: Vector2[default = 0,0]`: Describes the actual position relative to the terminal of this [`UIObject`](#UIObject), only updated when `UIObject:Update()`.
+* `AutomaticSize: AutomaticSize[default = AutomaticSize.None]`: Determines whether this object is resized based on child content.
 * `Size: UDim2[default = 0,0,0,0]`: Describes the size relative to the parent object (or the terminal, if no parent) of this [`UIObject`](#UIObject)
-* `AbsoluteSize: UDim2[default = 0,0,0,0]`: Describes the actual size relative to the terminal of this [`UIObject`](#UIObject), only updated when `UIObject:Update()` is called. The `.Scale` values of the `UDim`s are ignored.
+* `AbsoluteSize: Vector2[default = 0,0]`: Describes the actual size (in characters) relative to the terminal of this [`UIObject`](#UIObject), only updated when `UIObject:Update()`.
 * `NextSelectionRight, NextSelectionLeft, NextSelectionUp, NextSelectionDown: UIObject[default = nil]`: These are used for determining what hitting the arrow-keys will move the `Active` item to.
 * `Selectable: boolean[default = false]`: Determines if a [`UIObject`](#UIObject) is selectable.
 * `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard. When selected using arrow keys, will display a border around the object using `UIObject.SelectionColor`.
@@ -131,3 +133,23 @@ Inherits from [`UIButton`](#UIButton) and [`ImageLabel`](#ImageLabel)
 #### Properties
 * `PressedImage: content`: The image that will be drawn when an [`ImageButton`](#ImageButton) is pressed.
 * `TileCount: UDim2[default = 0,1,0,1]`: The amount to tile the image in each direction, if `ScaleType.Tile` is selected.
+
+### Frame
+A [`UIObject`](#UIObject) that renders simply as a rectangle with no other content. Despite being "nothings", they are useful as containers for other [`UIObject`](#UIObject)s.
+
+#### Properties
+* `Style: FrameStyle[default = FrameStyle.Square]`: The style of frame to be used.
+
+### ScrollingFrame
+A special version of a [`Frame`](#Frame) which handles scrolling for you.
+
+#### Properties
+* `AbsoluteWindowSize: Vector2[default = 0,0]`: The size in characters of the frame, without scrollbars.
+* `CanvasPosition: Vector2[default = 0,0]`: The location within the canvas that is drawn at the top-right corner of the [`ScrollingFrame`](#ScrollingFrame).
+* `CanvasSize: UDim2[default = 0,0,0,0]`: The size of the area that is scrollable. The `UDim2` is calculated using the parent object's size, not this object's size.
+* `AutomaticCanvasSize: AutomaticSize[default = AutomaticSize.None]`: Determines whether the `CanvasSize` is resized based on child content.
+* `BottomChar: char[default = ↓]`: The character used for the down arrow on the scrollbar.
+* `TopChar: char[default = ↑]`: The character used for the up arrow on the scrollbar.
+* `ScrollBarThickness: int[default = 1]`: The thickness in characters of the scrollbar. This applies to both vertical and horizontal scrollbars.
+* `ScrollingDirection: ScrollingDirection[default = ScrollingDirection.XY]`: The direction this [`ScrollingFrame`](#ScrollingFrame) is allowed to scroll.
+* `ScrollingEnabled: boolean[default = true]`: Whether or not scrolling is allowed. When false, scroll bars will not be rendered.
