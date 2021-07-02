@@ -5,8 +5,20 @@ local Instance = require "Objects.Instance"
 local UDim = require "Objects.UDim"
 local expect = require "cc.expect".expect
 
-
-local UDim2 = {ClassName = "UDim2"} --- @type UDim2
+local _x, _y =
+local UDim2 = {
+  ClassName = "UDim2",
+  _creatable = true,
+  _properties = function()
+    local x, y = Instance.new(UDim, 0, 0), Instance.new(UDim, 0, 0)
+    return {
+      X = x,
+      Y = y,
+      Width = x,
+      Height = y
+    }
+  end
+} --- @type UDim2
 Instance.Register(UDim2)
 
 --- Add two udim2s, used for __add operation.

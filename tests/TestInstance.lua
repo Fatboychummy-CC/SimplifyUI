@@ -1,33 +1,72 @@
 local Instance = require "Objects.Instance"
 
-local dummyClass = {ClassName = "DummyClass"}
-Instance.Register(dummyClass)
+local dummyClass, dummyClass2, dummyClass3
 
-function dummyClass.new(instanceData, arg)
-  instanceData.value = arg
+local ok, err = pcall(function()
+  dummyClass = {ClassName = "DummyClass", _creatable = true, _properties = {someVal = "Hello"}}
+  Instance.Register(dummyClass)
 
-  function instanceData._internal:Clone()
-    return Instance.new(dummyClass, self.value)
+  function dummyClass.new(instanceData, arg)
+    instanceData.value = arg
+
+    function instanceData._internal:Clone()
+      return Instance.new(dummyClass, self.value)
+    end
+    function instanceData._internal:Destroy()
+      for k, v in pairs(self) do self[k] = nil end
+    end
+
+    instanceData.WRITING = nil
+
+    return instanceData
   end
-  function instanceData._internal:Destroy()
-    for k, v in pairs(self) do self[k] = nil end
+
+  dummyClass2 = {ClassName = "DummyClass2", _creatable = true, _properties = {someOtherVal = "World!"}}
+  Instance.Register(dummyClass2, {dummyClass})
+
+  function dummyClass2.new(instanceData)
+    function instanceData._internal:Clone()
+      return Instance.new(dummyClass2, self.value)
+    end
+    function instanceData._internal:Destroy()
+      for k, v in pairs(self) do self[k] = nil end
+    end
+
+    instanceData.WRITING = nil
+
+    return instanceData
   end
 
-  instanceData.WRITING = nil
+  dummyClass3 = {ClassName = "DummyClass3", _creatable = true, _properties = {thirdVal = "Bruh"}}
+  Instance.Register(dummyClass3, {dummyClass, dummyClass2})
 
-  return instanceData
-end
+  function dummyClass3.new(instanceData)
+    function instanceData._internal:Clone()
+      return Instance.new(dummyClass3, self.value)
+    end
+    function instanceData._internal:Destroy()
+      for k, v in pairs(self) do self[k] = nil end
+    end
+
+    instanceData.WRITING = nil
+
+    return instanceData
+  end
+end)
+
+if not ok then printError("Failed to create dummy classes.") error(err, -1) end
+if not dummyClass or not dummyClass2 or not dummyClass3 then error("Failed to create dummy classes: Unknown", -1) end
 
 cctest.newSuite "TestInstance"
-  "REGISTRATION" (function()
+  "[DE]REGISTRATION" (function()
     local fakeClass = {}
-    EXPECT_NO_THROW(Instance.Register, fakeClass)
+    ASSERT_NO_THROW(Instance.Register, fakeClass)
 
     EXPECT_NO_THROW(Instance.DeRegister, fakeClass)
   end)
   "CREATION" (function()
-    local fakeClass = {ClassName = "Derp"}
-    EXPECT_NO_THROW(Instance.Register, fakeClass)
+    local fakeClass = {ClassName = "Derp", _creatable = true}
+    ASSERT_NO_THROW(Instance.Register, fakeClass)
 
     local argData = "Bla bla YEET"
 
@@ -39,8 +78,8 @@ cctest.newSuite "TestInstance"
     end
 
     local classObject
-    EXPECT_NO_THROW(function() classObject = Instance.new(fakeClass, argData) end)
-    EXPECT_TYPE(classObject, "table")
+    ASSERT_NO_THROW(function() classObject = Instance.new(fakeClass, argData) end)
+    ASSERT_TYPE(classObject, "table")
     EXPECT_TRUE(classObject.Archivable)
     EXPECT_TRUE(classObject.IsInstance)
     EXPECT_EQ(classObject.ClassName, fakeClass.ClassName)
@@ -58,6 +97,19 @@ cctest.newSuite "TestInstance"
     EXPECT_THROW_ANY_ERROR(function() classObject.Value2 = 32 end)
 
     EXPECT_NO_THROW(Instance.DeRegister, fakeClass)
+  end)
+  "INHERITANCE_1_DEPTH" (function()
+    local obj = Instance.new(dummyClass2)
+
+    EXPECT_EQ(obj.someVal, dummyClass._properties.someVal)
+    EXPECT_EQ(obj.someOtherVal, dummyClass2._properties.someOtherVal)
+  end)
+  "INHERITANCE_2_DEPTH" (function()
+    local obj = Instance.new(dummyClass3)
+
+    EXPECT_EQ(obj.someVal, dummyClass._properties.someVal)
+    EXPECT_EQ(obj.someOtherVal, dummyClass2._properties.someOtherVal)
+    EXPECT_EQ(obj.thirdVal, dummyClass3._properties.thirdVal)
   end)
   "CLONE" (function()
     local v1 = Instance.new(dummyClass, "Hello World!")
@@ -105,8 +157,46 @@ cctest.newSuite "TestInstance"
     EXPECT_DEEP_TABLE_EQ(v3, {})
     EXPECT_DEEP_TABLE_EQ(v4, {})
   end)
-  "DESTROY" (DISABLED, function()
-    FAIL("Unimplemented")
+  "DESTROY" (function()
+    local fakeClass = {ClassName = "TestDestruction", _creatable = true}
+    ASSERT_NO_THROW(Instance.Register, fakeClass)
+    local destructorTimesRun = 0
+
+    function fakeClass.new(data)
+      EXPECT_TYPE(data, "table")
+
+      function data._internal.Destroy(self)
+        for k, v in pairs(self) do self[k] = nil end
+        destructorTimesRun = destructorTimesRun + 1
+      end
+
+      return data
+    end
+
+    local fake1 = Instance.new(fakeClass)
+    fake1.Name = "Parent"
+
+    local fake2 = Instance.new(fakeClass)
+    fake2.Name = "Child"
+    fake2.Parent = fake1
+
+    ASSERT_NO_THROW(fake1.Destroy, fake1)
+    ASSERT_EQ(destructorTimesRun, 2)
+
+    -- The metatable should be removed, so we should be able to throw any index into the table and not error.
+    EXPECT_NO_THROW(function() local x = fake1.randomIndex end)
+    EXPECT_NO_THROW(function() local x = fake2.randomIndex end)
+
+
+    -- Nothing should exist in the tables.
+    for k, v in pairs(fake1) do
+      FAIL(string.format("fake1 key '%s' still exists (value: %s)", k, v))
+    end
+    for k, v in pairs(fake2) do
+      FAIL(string.format("fake2 key '%s' still exists (value: %s)", k, v))
+    end
+
+    EXPECT_NO_THROW(Instance.DeRegister, fakeClass)
   end)
   "FIND_FIRST_ANCESTOR" (DISABLED, function()
     FAIL("Unimplemented")

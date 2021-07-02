@@ -2,6 +2,7 @@
 -- @module Instance
 
 local expect = require "cc.expect".expect
+local TE = require "Objects.Util.TableExtensions"
 
 local Instance = {
   Archivable = false,
@@ -49,7 +50,7 @@ end
 
 function Instance.DeRegister(class)
   expect(1, class, "table")
-  
+
   Instance.Instances[class] = nil
 end
 
@@ -115,7 +116,28 @@ end
 
 
 local function incomplete(field)
-  return string.format("Attempt to create incomplete Instance (missing field '%s')", field)
+  return string.format("Attempt to create incomplete Instance (%s)", field)
+end
+
+local function getProperties(class)
+  local properties = class._properties
+
+  -- Allow initializer function for properties.
+  if type(properties) == "function" then
+    properties = properties()
+  end
+
+  -- Not a function,
+  local clone = TE.deepCopy(properties) -- clone all the information from the class `_properties`
+  local info = {}
+
+  if type(clone) == "table" then
+    for k, v in pairs(clone) do
+      info[k] = v -- copy the data to our table.
+    end
+  end
+
+  return info
 end
 --- Create an instance.
 -- @tparam table self The object to be created. The most notable change from Roblox Instance to these Instances are that these Instance take the `require`d object instead of a string name.
@@ -123,16 +145,25 @@ end
 function Instance.new(class, ...)
   expect(1, class, "table")
 
+  if not Instance.Instances[class] then
+    printError(class)
+    printError(Instance.Instances[class])
+    error(incomplete("Class registration incomplete"), 2)
+  end
   if class == Instance then
     error("Unable to create Instance of Instance.", 2)
   end
+  if not class._creatable then
+    error("Attempt to create non-creatable class-type.", 2)
+  end
   if not class.new then
-    error(incomplete("new"), 2)
+    error(incomplete("Missing method: new"), 2)
   end
   if not class.ClassName then
-    error(incomplete("ClassName"), 2)
+    error(incomplete("Missing method: ClassName"), 2)
   end
 
+  -- Register the data all instances should have.
   local AllInstances = {
     IsInstance = true,
     Archivable = true,
@@ -146,6 +177,23 @@ function Instance.new(class, ...)
     WRITING = true,
     _internal = {}
   }
+
+  -- Register the properties from parent classes, if applicable.
+  local parents = Instance.Instances[class]
+  for i = 1, #parents do
+    local current = parents[i]
+    if current then
+      local clone = getProperties(current)
+      for k, v in pairs(clone) do
+        AllInstances[k] = v -- copy all the properties to this object.
+      end
+    end
+  end
+
+  local clone = getProperties(class)
+  for k, v in pairs(clone) do
+    AllInstances[k] = v -- copy all the properties to this object.
+  end
 
   return class.new(setmetatable(AllInstances, Instance:CloneMetaTable()), ...)
 end
@@ -188,6 +236,10 @@ end
 --- Sets the Instance.Parent property to nil, locks the Instance.Parent property, and calls Destroy on all children.
 function Instance:Destroy()
   expect(1, self, "table")
+
+  if not self._internal.Destroy then
+    error(string.format("Destructor for Instance '%s' does not exist! It is of type '%s'.", self.Name, self.ClassName), 2)
+  end
 
   self.Parent = nil
 
