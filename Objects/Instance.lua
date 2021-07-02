@@ -103,8 +103,10 @@ function Instance.CloneMetaTable()
             value.Children[self] = true
           else
             -- must be nil, tell parent to remove ourself from list of children
-            self._proxy.Parent.Children[self] = nil
-            self._proxy.Parent = Instance.INSTANCE_ROOT
+            if self._proxy.Parent.Children then
+              self._proxy.Parent.Children[self] = nil
+              self._proxy.Parent = Instance.INSTANCE_ROOT
+            end
           end
         else
           error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)

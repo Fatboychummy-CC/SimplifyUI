@@ -151,7 +151,7 @@ cctest.newSuite "TestInstance"
 
     v1:ClearAllChildren()
 
-    EXPECT_EQ(#v1.Children, 0)
+    EXPECT_EQ(#v1.Children._proxy, 0)
 
     EXPECT_DEEP_TABLE_EQ(v2, {})
     EXPECT_DEEP_TABLE_EQ(v3, {})
@@ -170,6 +170,8 @@ cctest.newSuite "TestInstance"
         destructorTimesRun = destructorTimesRun + 1
       end
 
+      data.WRITING = nil
+
       return data
     end
 
@@ -178,7 +180,10 @@ cctest.newSuite "TestInstance"
 
     local fake2 = Instance.new(fakeClass)
     fake2.Name = "Child"
+
     fake2.Parent = fake1
+
+    ASSERT_EQ(fake1.Children._proxy[1], fake2)
 
     ASSERT_NO_THROW(fake1.Destroy, fake1)
     ASSERT_EQ(destructorTimesRun, 2)
@@ -186,7 +191,6 @@ cctest.newSuite "TestInstance"
     -- The metatable should be removed, so we should be able to throw any index into the table and not error.
     EXPECT_NO_THROW(function() local x = fake1.randomIndex end)
     EXPECT_NO_THROW(function() local x = fake2.randomIndex end)
-
 
     -- Nothing should exist in the tables.
     for k, v in pairs(fake1) do
