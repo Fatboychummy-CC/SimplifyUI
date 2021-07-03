@@ -202,22 +202,155 @@ cctest.newSuite "TestInstance"
 
     EXPECT_NO_THROW(Instance.DeRegister, fakeClass)
   end)
-  "FIND_FIRST_ANCESTOR" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_ANCESTOR" (function()
+    local random1 = Instance.new(dummyClass2)
+    random1.Name = "NotWhatWeWant"
+    local searchFor = Instance.new(dummyClass)
+    searchFor.Name = "ObjectToFind"
+    local random2 = Instance.new(dummyClass3)
+    random2.Name = "NotThisEither"
+    local random3 = Instance.new(dummyClass)
+    random3.Name = "Nope"
+
+    searchFor.Parent = random1
+    random2.Parent = searchFor
+    random3.Parent = random2
+
+    local ancestor = random3:FindFirstAncestor(searchFor.Name)
+
+    EXPECT_EQ(ancestor, searchFor)
   end)
-  "FIND_FIRST_ANCESTOR_OF_CLASS" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_ANCESTOR_OF_CLASS" (function()
+    local random1 = Instance.new(dummyClass2)
+    random1.Name = "NotWhatWeWant"
+    local searchFor = Instance.new(dummyClass)
+    searchFor.Name = "ObjectToFind"
+    local random2 = Instance.new(dummyClass3)
+    random2.Name = "NotThisEither"
+    local random3 = Instance.new(dummyClass2)
+    random3.Name = "Nope"
+
+    searchFor.Parent = random1
+    random2.Parent = searchFor
+    random3.Parent = random2
+
+    local ancestor = random3:FindFirstAncestorOfClass(dummyClass.ClassName)
+
+    EXPECT_EQ(ancestor, searchFor)
   end)
-  "FIND_FIRST_ANCESTOR_WHICH_IS_A" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_ANCESTOR_WHICH_IS_A" (function()
+    local fakeClass = {ClassName = "TestDestruction", _creatable = true}
+    ASSERT_NO_THROW(Instance.Register, fakeClass)
+    local destructorTimesRun = 0
+
+    function fakeClass.new(data)
+      EXPECT_TYPE(data, "table")
+
+      function data._internal.Destroy(self)
+        for k, v in pairs(self) do self[k] = nil end
+        destructorTimesRun = destructorTimesRun + 1
+      end
+
+      data.WRITING = nil
+
+      return data
+    end
+
+    local random1 = Instance.new(fakeClass)
+    random1.Name = "NotWhatWeWant"
+    local searchFor = Instance.new(dummyClass3)
+    searchFor.Name = "ObjectToFind"
+    local random2 = Instance.new(fakeClass)
+    random2.Name = "NotThisEither"
+    local random3 = Instance.new(fakeClass)
+    random3.Name = "Nope"
+
+    searchFor.Parent = random1
+    random2.Parent = searchFor
+    random3.Parent = random2
+
+    local ancestor = random3:FindFirstAncestorWhichIsA(dummyClass.ClassName)
+
+    EXPECT_EQ(ancestor, searchFor)
+
+    ASSERT_NO_THROW(Instance.DeRegister, fakeClass)
   end)
-  "FIND_FIRST_CHILD" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_CHILD" (function()
+    local random1 = Instance.new(dummyClass2)
+    random1.Name = "NotWhatWeWant"
+    local searchFor = Instance.new(dummyClass)
+    searchFor.Name = "ObjectToFind"
+    local random2 = Instance.new(dummyClass3)
+    random2.Name = "NotThisEither"
+    local random3 = Instance.new(dummyClass2)
+    random3.Name = "Nope"
+
+    searchFor.Parent = random1
+    random2.Parent = searchFor
+    random3.Parent = random2
+
+    local child = random1:FindFirstChild(searchFor.Name)
+
+    EXPECT_EQ(child, searchFor)
   end)
-  "FIND_FIRST_CHILD_OF_CLASS" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_CHILD_RECURSIVE" (function()
+    local random1 = Instance.new(dummyClass2)
+    random1.Name = "NotWhatWeWant"
+    local random2 = Instance.new(dummyClass3)
+    random2.Name = "NotThisEither"
+    local searchFor = Instance.new(dummyClass)
+    searchFor.Name = "ObjectToFind"
+    local random3 = Instance.new(dummyClass2)
+    random3.Name = "Nope"
+
+    random2.Parent = random1
+    random3.Parent = random2
+    searchFor.Parent = random2
+
+    local child = random1:FindFirstChild(searchFor.Name, true)
+
+    EXPECT_EQ(child, searchFor)
+  end)
+  "FIND_FIRST_CHILD_OF_CLASS" (function()
+    local random1 = Instance.new(dummyClass2)
+    random1.Name = "NotWhatWeWant"
+    local searchFor = Instance.new(dummyClass)
+    searchFor.Name = "ObjectToFind"
+    local random2 = Instance.new(dummyClass3)
+    random2.Name = "NotThisEither"
+    local random3 = Instance.new(dummyClass2)
+    random3.Name = "Nope"
+
+    searchFor.Parent = random1
+    random2.Parent = searchFor
+    random3.Parent = random2
+
+    local child = random1:FindFirstChildOfClass(searchFor.ClassName)
+
+    EXPECT_EQ(child, searchFor)
+  end)
+  "FIND_FIRST_CHILD_OF_CLASS_RECURSIVE" (function()
+    local random1 = Instance.new(dummyClass2)
+    random1.Name = "NotWhatWeWant"
+    local random2 = Instance.new(dummyClass3)
+    random2.Name = "NotThisEither"
+    local searchFor = Instance.new(dummyClass)
+    searchFor.Name = "ObjectToFind"
+    local random3 = Instance.new(dummyClass2)
+    random3.Name = "Nope"
+
+    random2.Parent = random1
+    random3.Parent = random2
+    searchFor.Parent = random2
+
+    local child = random1:FindFirstChild(searchFor.ClassName, true)
+
+    EXPECT_EQ(child, searchFor)
   end)
   "FIND_FIRST_CHILD_WHICH_IS_A" (DISABLED, function()
+    FAIL("Unimplemented")
+  end)
+  "FIND_FIRST_CHILD_WHICH_IS_A_RECURSIVE" (DISABLED, function()
     FAIL("Unimplemented")
   end)
   "FIND_FIRST_DESCENDANT" (DISABLED, function()

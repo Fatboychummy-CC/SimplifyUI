@@ -15,6 +15,10 @@ local Instance = {
 
 -- Children metatable for tracking ancestry.
 local childrenMetaTable = {}
+function childrenMetaTable:__len()
+  return #self._proxy
+end
+
 function childrenMetaTable:__index(idx)
   return self._proxy[idx]
 end
