@@ -478,7 +478,7 @@ function Instance:IsDescendantOf(ancestor)
 
   local current = self.Parent
   while type(current) == "table" do
-    if ancestor == self then return true end
+    if current == ancestor then return true end
     current = current.Parent
   end
 
