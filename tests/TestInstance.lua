@@ -1,6 +1,6 @@
 local Instance = require "Objects.Instance"
 
-local dummyClass, dummyClass2, dummyClass3
+local dummyClass, dummyClass2, dummyClass3, alternateDummy
 
 local ok, err = pcall(function()
   dummyClass = {ClassName = "DummyClass", _creatable = true, _properties = {someVal = "Hello"}}
@@ -43,6 +43,21 @@ local ok, err = pcall(function()
   function dummyClass3.new(instanceData)
     function instanceData._internal:Clone()
       return Instance.new(dummyClass3, self.value)
+    end
+    function instanceData._internal:Destroy()
+      for k, v in pairs(self) do self[k] = nil end
+    end
+
+    instanceData.WRITING = nil
+
+    return instanceData
+  end
+
+  alternateDummy = {ClassName = "AlternateDummy", _creatable = true, _properties = {}}
+  Instance.Register(alternateDummy)
+  function alternateDummy.new(instanceData)
+    function instanceData._internal:Clone()
+      return Instance.new(alternateDummy)
     end
     function instanceData._internal:Destroy()
       for k, v in pairs(self) do self[k] = nil end
@@ -239,30 +254,13 @@ cctest.newSuite "TestInstance"
     EXPECT_EQ(ancestor, searchFor)
   end)
   "FIND_FIRST_ANCESTOR_WHICH_IS_A" (function()
-    local fakeClass = {ClassName = "TestDestruction", _creatable = true}
-    ASSERT_NO_THROW(Instance.Register, fakeClass)
-    local destructorTimesRun = 0
-
-    function fakeClass.new(data)
-      EXPECT_TYPE(data, "table")
-
-      function data._internal.Destroy(self)
-        for k, v in pairs(self) do self[k] = nil end
-        destructorTimesRun = destructorTimesRun + 1
-      end
-
-      data.WRITING = nil
-
-      return data
-    end
-
-    local random1 = Instance.new(fakeClass)
+    local random1 = Instance.new(alternateDummy)
     random1.Name = "NotWhatWeWant"
     local searchFor = Instance.new(dummyClass3)
     searchFor.Name = "ObjectToFind"
-    local random2 = Instance.new(fakeClass)
+    local random2 = Instance.new(alternateDummy)
     random2.Name = "NotThisEither"
-    local random3 = Instance.new(fakeClass)
+    local random3 = Instance.new(alternateDummy)
     random3.Name = "Nope"
 
     searchFor.Parent = random1
@@ -272,8 +270,6 @@ cctest.newSuite "TestInstance"
     local ancestor = random3:FindFirstAncestorWhichIsA(dummyClass.ClassName)
 
     EXPECT_EQ(ancestor, searchFor)
-
-    ASSERT_NO_THROW(Instance.DeRegister, fakeClass)
   end)
   "FIND_FIRST_CHILD" (function()
     local random1 = Instance.new(dummyClass2)
@@ -347,30 +343,164 @@ cctest.newSuite "TestInstance"
 
     EXPECT_EQ(child, searchFor)
   end)
-  "FIND_FIRST_CHILD_WHICH_IS_A" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_CHILD_WHICH_IS_A" (function()
+    local random1 = Instance.new(alternateDummy)
+    random1.Name = "NotWhatWeWant"
+    local searchFor = Instance.new(dummyClass3)
+    searchFor.Name = "ObjectToFind"
+    local random2 = Instance.new(alternateDummy)
+    random2.Name = "NotThisEither"
+    local random3 = Instance.new(alternateDummy)
+    random3.Name = "Nope"
+
+    searchFor.Parent = random1
+    random2.Parent = searchFor
+    random3.Parent = random2
+
+    local child = random1:FindFirstChildWhichIsA(dummyClass.ClassName)
+
+    EXPECT_EQ(child, searchFor)
   end)
-  "FIND_FIRST_CHILD_WHICH_IS_A_RECURSIVE" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_CHILD_WHICH_IS_A_RECURSIVE" (function()
+    local random1 = Instance.new(alternateDummy)
+    random1.Name = "NotWhatWeWant"
+    local random2 = Instance.new(alternateDummy)
+    random2.Name = "NotThisEither"
+    local searchFor = Instance.new(dummyClass3)
+    searchFor.Name = "ObjectToFind"
+    local random3 = Instance.new(alternateDummy)
+    random3.Name = "Nope"
+
+    random2.Parent = random1
+    random3.Parent = random2
+    searchFor.Parent = random2
+
+    local child = random1:FindFirstChildWhichIsA(dummyClass.ClassName, true)
+
+    EXPECT_EQ(child, searchFor)
   end)
-  "FIND_FIRST_DESCENDANT" (DISABLED, function()
-    FAIL("Unimplemented")
+  "FIND_FIRST_DESCENDANT" (function()
+    local random1 = Instance.new(alternateDummy)
+    random1.Name = "NotWhatWeWant"
+    local random2 = Instance.new(alternateDummy)
+    random2.Name = "NotThisEither"
+    local searchFor = Instance.new(dummyClass3)
+    searchFor.Name = "ObjectToFind"
+    local random3 = Instance.new(alternateDummy)
+    random3.Name = "Nope"
+
+    random2.Parent = random1
+    random3.Parent = random2
+    searchFor.Parent = random2
+
+    local descendant = random1:FindFirstDescendant(searchFor.Name)
+
+    EXPECT_EQ(descendant, searchFor)
   end)
-  "GET_ACTOR" (DISABLED, function()
-    FAIL("Unimplemented")
+  "GET_ACTOR" (function()
+    FAIL("Actors are currently disabled.")
   end)
-  "GET_CHILDREN" (DISABLED, function()
-    FAIL("Unimplemented")
+  "GET_CHILDREN" (function()
+    local obj1 = Instance.new(dummyClass)
+    obj1.Name = "Parent"
+    local obj2 = Instance.new(dummyClass)
+    obj2.Name = "Child1"
+    obj2.Parent = obj1
+    local obj3 = Instance.new(dummyClass)
+    obj3.Name = "ChildOfChild1"
+    obj3.Parent = obj1
+
+    local children, children2
+    EXPECT_NO_THROW(function()
+      -- Grab children twice to ensure that children table does not allow changes.
+      children = obj1:GetChildren()
+      children2 = obj1:GetChildren()
+    end)
+
+    EXPECT_EQ(#children, 2)
+    EXPECT_EQ(#children2, 2)
+
+    EXPECT_NO_THROW(function() children[1] = nil end)
+
+    EXPECT_EQ(children[1], nil)
+    EXPECT_UEQ(children2[1], nil)
   end)
-  "GET_FULL_NAME" (DISABLED, function()
-    FAIL("Unimplemented")
+  "GET_FULL_NAME" (function()
+    local obj1 = Instance.new(dummyClass)
+    obj1.Name = "Parent"
+    local obj2 = Instance.new(dummyClass)
+    obj2.Name = "Child1"
+    obj2.Parent = obj1
+    local obj3 = Instance.new(dummyClass)
+    obj3.Name = "ChildOfChild1"
+    obj3.Parent = obj2
+
+    EXPECT_EQ(obj3:GetFullName(), "term.Parent.Child1.ChildOfChild1")
   end)
-  "IS_A" (DISABLED, function()
-    FAIL("Unimplemented")
+  "IS_A" (function()
+    local d1 = Instance.new(dummyClass)
+    local d2 = Instance.new(dummyClass2)
+    local d3 = Instance.new(dummyClass3)
+    local ad = Instance.new(alternateDummy)
+
+    EXPECT_TRUE(d1:IsA(dummyClass.ClassName))
+    EXPECT_FALSE(d1:IsA(alternateDummy.ClassName))
+
+    EXPECT_TRUE(d2:IsA(dummyClass.ClassName))
+    EXPECT_TRUE(d2:IsA(dummyClass2.ClassName))
+    EXPECT_FALSE(d2:IsA(alternateDummy.ClassName))
+
+    EXPECT_TRUE(d3:IsA(dummyClass.ClassName))
+    EXPECT_TRUE(d3:IsA(dummyClass2.ClassName))
+    EXPECT_TRUE(d3:IsA(dummyClass3.ClassName))
+    EXPECT_FALSE(d3:IsA(alternateDummy.ClassName))
+
+    EXPECT_FALSE(ad:IsA(dummyClass.ClassName))
+    EXPECT_FALSE(ad:IsA(dummyClass2.ClassName))
+    EXPECT_FALSE(ad:IsA(dummyClass3.ClassName))
+    EXPECT_TRUE(ad:IsA(alternateDummy.ClassName))
   end)
-  "IS_ANCESTOR_OF" (DISABLED, function()
-    FAIL("Unimplemented")
+  "IS_ANCESTOR_OF" (function()
+    local obj1 = Instance.new(dummyClass)
+    obj1.Name = "Parent"
+    local obj2 = Instance.new(dummyClass)
+    obj2.Name = "Child1"
+    obj2.Parent = obj1
+    local obj3 = Instance.new(dummyClass)
+    obj3.Name = "ChildOfChild1"
+    obj3.Parent = obj2
+
+    EXPECT_FALSE(obj1:IsAncestorOf(obj1))
+    EXPECT_TRUE(obj1:IsAncestorOf(obj2))
+    EXPECT_TRUE(obj1:IsAncestorOf(obj3))
+
+    EXPECT_FALSE(obj2:IsAncestorOf(obj1))
+    EXPECT_FALSE(obj2:IsAncestorOf(obj2))
+    EXPECT_TRUE(obj2:IsAncestorOf(obj3))
+
+    EXPECT_FALSE(obj3:IsAncestorOf(obj1))
+    EXPECT_FALSE(obj3:IsAncestorOf(obj2))
+    EXPECT_FALSE(obj3:IsAncestorOf(obj3))
   end)
-  "IS_DESCENDANT_OF" (DISABLED, function()
-    FAIL("Unimplemented")
+  "IS_DESCENDANT_OF" (function()
+    local obj1 = Instance.new(dummyClass)
+    obj1.Name = "Parent"
+    local obj2 = Instance.new(dummyClass)
+    obj2.Name = "Child1"
+    obj2.Parent = obj1
+    local obj3 = Instance.new(dummyClass)
+    obj3.Name = "ChildOfChild1"
+    obj3.Parent = obj2
+
+    EXPECT_FALSE(obj1:IsDescendantOf(obj1))
+    EXPECT_FALSE(obj1:IsDescendantOf(obj2))
+    EXPECT_FALSE(obj1:IsDescendantOf(obj3))
+
+    EXPECT_TRUE(obj2:IsDescendantOf(obj1))
+    EXPECT_FALSE(obj2:IsDescendantOf(obj2))
+    EXPECT_FALSE(obj2:IsDescendantOf(obj3))
+
+    EXPECT_TRUE(obj3:IsDescendantOf(obj1))
+    EXPECT_TRUE(obj3:IsDescendantOf(obj2))
+    EXPECT_FALSE(obj3:IsDescendantOf(obj3))
   end)
