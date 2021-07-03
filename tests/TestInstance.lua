@@ -397,7 +397,7 @@ cctest.newSuite "TestInstance"
 
     EXPECT_EQ(descendant, searchFor)
   end)
-  "GET_ACTOR" (function()
+  "GET_ACTOR" (DISABLED, function()
     FAIL("Actors are currently disabled.")
   end)
   "GET_CHILDREN" (function()
