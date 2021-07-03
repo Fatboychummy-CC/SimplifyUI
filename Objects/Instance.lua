@@ -80,7 +80,7 @@ function Instance.CloneMetaTable()
       end
 
       -- does not exist, error
-      error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
+      error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self:GetFullName()), 2)
     end,
     __newindex = function(self, idx, value)
       if rawget(self, "WRITING") then
@@ -113,7 +113,7 @@ function Instance.CloneMetaTable()
             end
           end
         else
-          error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self.Name), 2)
+          error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self:GetFullName()), 2)
         end
       end
     end
@@ -417,6 +417,8 @@ function Instance:GetFullName()
     table.insert(ancestry, 1, current.Name)
     current = current.Parent
   end
+
+  table.insert(ancestry, 1, "term")
 
   return table.concat(ancestry, '.')
 end
