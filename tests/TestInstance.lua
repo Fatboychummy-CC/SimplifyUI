@@ -339,7 +339,7 @@ cctest.newSuite "TestInstance"
     random3.Parent = random2
     searchFor.Parent = random2
 
-    local child = random1:FindFirstChild(searchFor.ClassName, true)
+    local child = random1:FindFirstChildOfClass(searchFor.ClassName, true)
 
     EXPECT_EQ(child, searchFor)
   end)
