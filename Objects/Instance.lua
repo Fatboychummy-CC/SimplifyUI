@@ -323,7 +323,8 @@ function Instance:FindFirstChild(name, recursive)
       return self.Children[i]
     end
     if recursive then
-      self.Children[i]:FindFirstChild(name, true)
+      local child = self.Children[i]:FindFirstChild(name, true)
+      if child then return child end
     end
   end
 end
@@ -341,7 +342,8 @@ function Instance:FindFirstChildOfClass(className, recursive)
       return self.Children[i]
     end
     if recursive then
-      self.Children[i]:FindFirstChildOfClass(className, true)
+      local child = self.Children[i]:FindFirstChildOfClass(className, true)
+      if child then return child end
     end
   end
 end
@@ -359,7 +361,8 @@ function Instance:FindFirstChildWhichIsA(className, recursive)
       return self.Children[i]
     end
     if recursive then
-      self.Children[i]:FindFirstChildWhichIsA(className, true)
+      local child = self.Children[i]:FindFirstChildWhichIsA(className, true)
+      if child then return child end
     end
   end
 end
