@@ -27,7 +27,7 @@ By default, a UIObject only defines an area in which *something* will be drawn t
 * `AutomaticSize: AutomaticSize[default = AutomaticSize.None]`: Determines whether this object is resized based on child content.
 * `Size: UDim2[default = 0,0,0,0]`: Describes the size relative to the parent object (or the terminal, if no parent) of this [`UIObject`](#UIObject)
 * `AbsoluteSize: Vector2[default = 0,0]`: Describes the actual size (in characters) relative to the terminal of this [`UIObject`](#UIObject), only updated when `UIObject:Update()`.
-* `NextSelectionRight, NextSelectionLeft, NextSelectionUp, NextSelectionDown: UIObject[default = nil]`: These are used for determining what hitting the arrow-keys will move the `Active` item to.
+* `NextSelectionRight, NextSelectionLeft, NextSelectionUp, NextSelectionDown: UIObject[default = UIObject.NULL_UI]`: These are used for determining what hitting the arrow-keys will move the `Active` item to.
 * `Selectable: boolean[default = false]`: Determines if a [`UIObject`](#UIObject) is selectable.
 * `Selected: boolean[default = false]`: Determines if this object has been selected by keyboard. When selected using arrow keys, will display a border around the object using `UIObject.SelectionColor`.
 * `Active: boolean[default = true]`: Controls when a UI element will sink inputs from reaching other elements behind it.
