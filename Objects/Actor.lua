@@ -1,9 +1,13 @@
 local expect = require "cc.expect".expect
+local unpack = table.unpack
+local remove = table.remove
 
 local Actor = {}
 
 local actors = {lastID = 0}
 local actorRunOrder = {n = 0}
+
+
 local function InsertActor(actorData)
   -- create the actor data
   actors.lastID = actors.lastID + 1
@@ -23,7 +27,7 @@ local function RemoveActor(actorID)
   actors[actorID] = nil
   for i = 1, actorRunOrder.n do
     if actorRunOrder[i] == actorID then
-      table.remove(actorRunOrder, i)
+      remove(actorRunOrder, i)
       return
     end
   end
@@ -51,36 +55,84 @@ local actorObjectMetaTable = {
       local data = table.remove(self.callData, 1)
       if data then
         self.callData.n = self.callData.n - 1
-        return table.unpack(data, 1, data.n)
+        return data
       end
     end,
     Available = function(self)
       expect(1, self, "table")
 
       return self.callData.n > 0
+    end,
+    Register = function(self, event, registrationName, callback)
+      expect(1, self, "table")
+      expect(2, event, "string")
+      expect(3, registrationName, "string")
+      expect(4, callback, "function")
+
+      -- Check if the table exists already.
+      local t = self.registrations[event]
+      if not t then -- create it if it doesn't.
+        self.registrations[event] = {n = 0}
+        t = self.registrations[event]
+      end
+
+      -- insert the item.
+      t.n = t.n + 1
+      t[t.n] = {registrationName, callback}
+    end,
+    DeRegister = function(self, event, registrationName)
+      expect(1, self, "table")
+      expect(2, event, "string")
+      expect(3, registrationName, "string")
+
+      -- check if it exists
+      local t = self.registrations[event]
+      if t and t.n > 0 then
+        -- if it does, loop and find registrationName
+        for i = 1, t.n do
+          if t[i][1] == registrationName then
+            local tmp = remove(t, i) -- if we find it, remove it.
+            if tmp then -- error checking, this shouldn't be needed but just checking if the item was *actually* removed.
+              t.n = t.n - 1
+            end
+          end
+        end
+      end
     end
   },
   __call = function(self, ...)
+    expect(1, self, "table")
+
     self:Call(...)
   end
 }
 
 --- Create a new actor.
-function Actor.New(coro, yieldFunc)
-  expect(1, coro, "thread", "function")
-  expect(2, yieldFunc, "function", "nil")
-
-  -- Convert function to a coroutine, if required.
-  coro = type(coro) == "function" and coroutine.create(coro) or coro
-
+function Actor.New()
   local actorData = setmetatable({
-    coroutine = coro,
     callData = {n = 0},
-    yieldFunc = yieldFunc
+    registrations = {n = 0}
   }, actorObjectMetaTable)
 
   local actorID = InsertActor(actorData)
   actorData.actorID = actorID
+
+  -- create the actor's coroutine.
+  local function actorCoroutineFunction()
+    local yield = coroutine.yield
+    local unpack = table.unpack
+    while true do
+      local data = yield() -- guarantee: event data will be packed to a table already.
+      local regs = actorData.registrations[data[1]]
+      if regs then
+        for i = 1, regs.n do
+          regs[i][2](unpack(data, 2, data.n))
+        end
+      end
+    end
+  end
+
+  actorData.coroutine = coroutine.create(actorCoroutineFunction)
   os.queueEvent("new_actor")
 
   return actorData
@@ -124,6 +176,7 @@ function Actor.Run(yieldFunc, main)
   expect(1, yieldFunc, "function")
   expect(2, main, "function", "thread", "nil")
   local hasMain, mainID = false, 0
+  local resume, status = coroutine.resume, coroutine.status
 
   -- If the player inserted a func or coroutine to main, insert it as an actor to be run.
   if type(main) == "function" or type(main) == "thread" then
@@ -146,31 +199,39 @@ function Actor.Run(yieldFunc, main)
       local actorID = actorRunOrder[i]
       local actor = actors[actorID]
 
-      -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
-      if actor and (actor.filter and actor.filter == event or not actor.filter) then
-        -- resume the coroutine with the event data.
-        local ok, result = coroutine.resume(actor.coroutine, table.unpack(eventData, 1, eventData.n))
+      repeat
+        -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
+        if actor and actor.events and actor.events[event] then
+          -- resume the coroutine with the event data.
+          local ok, result = resume(actor.coroutine, unpack(eventData, 1, eventData.n))
 
-        -- If the coroutine errored, error.
-        if not ok then
-          error(
-            string.format(
-              "Actor: Actor '%s' threw an error: %s",
-              actorID == mainID and "Main Thread" or actorID,
-              result),
-            -1
-          )
+          -- If the coroutine errored, error.
+          if not ok then
+            error(
+              string.format(
+                "Actor: Actor '%s' threw an error: %s",
+                actorID == mainID and "Main Thread" or actorID,
+                result),
+              -1
+            )
+          end
+
+          -- assign the actor to listen for whatever they wanted to listen for.
+          actor.filter = result
+
+          -- If the actor is now dead, remove it.
+          if status(actor.coroutine) == "dead" then
+            actorsToRemove.n = actorsToRemove.n + 1
+            actorsToRemove[actorsToRemove.n] = actorID
+          end
         end
 
-        -- assign the actor to listen for whatever they wanted to listen for.
-        actor.filter = result
-
-        -- If the actor is now dead, remove it.
-        if coroutine.status(actor.coroutine) == "dead" then
-          actorsToRemove.n = actorsToRemove.n + 1
-          actorsToRemove[actorsToRemove.n] = actorID
+        local available = actor:Available() -- check if the actor has any messages in the queue
+        if available then
+          eventData = actor:Read()
+          event = eventData[1]
         end
-      end
+      until not available
     end
 
     -- Actually remove the dead coroutine
