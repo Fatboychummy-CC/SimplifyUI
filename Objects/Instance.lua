@@ -488,4 +488,10 @@ function Instance:IsDescendantOf(ancestor)
   return false
 end
 
+function Instance:GetDebugID()
+  expect(1, self, "table")
+  
+  return self:GetActor().actorID
+end
+
 return Instance
