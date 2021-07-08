@@ -26,5 +26,9 @@
       remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/UDim2.lua",
       location = "UI/Objects/UDim2.lua"
     },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/UI/Term/UIObject/UIObject.lua",
+      location = "UI/Objects/UI/Term/UIObject/UIObject.lua"
+    },
   }
 }
