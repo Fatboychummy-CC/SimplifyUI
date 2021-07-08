@@ -1,0 +1,38 @@
+{
+  remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Simplifile",
+  name = "SimplifyUI",
+  files = {
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/init.lua",
+      location = "UI/init.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Simplifile",
+      location = "UI/Simplifile"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/Util/TableExtensions.lua",
+      location = "UI/Objects/Util/TableExtensions.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/Instance.lua",
+      location = "UI/Objects/Instance.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/Actor.lua",
+      location = "UI/Objects/Actor.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/UDim.lua",
+      location = "UI/Objects/UDim.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/UDim2.lua",
+      location = "UI/Objects/UDim2.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/UI/Term/UIObject/UIObject.lua",
+      location = "UI/Objects/UI/Term/UIObject/UIObject.lua"
+    },
+  }
+}

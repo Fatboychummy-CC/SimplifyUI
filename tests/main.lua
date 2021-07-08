@@ -1,12 +1,11 @@
-package.path = package.path .. ";/UI/tests/?.lua;/UI/Objects/?.lua;/UI/?.lua;/?.lua"
+package.path = package.path .. ";/UI/?.lua;/UI/?/init.lua"
 
 local cctest = require "Framework"
 _G.cctest = cctest
 
-require "TestBasicClass"
-require "TestEnum"
+require "TestActor"
+require "TestInstance"
 require "TestUDim"
 require "TestUDim2"
-require "TestUIControl"
 
-cctest.runAllTests()
+cctest.runAllTests(...)

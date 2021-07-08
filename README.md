@@ -13,3 +13,8 @@ I'm looking into getting a timeline for this, but I'm still drafting the main bu
 ### Examples?
 
 Soon:tm:
+
+### Installation
+Run `wget run https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUpdate/master/Updater.lua https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Simplifile LOCATION/TO/INSTALL/TO` to install.
+
+After done installing, you can use `wget run https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUpdate/master/Updater.lua` without arguments while inside the directory you installed this to to update.

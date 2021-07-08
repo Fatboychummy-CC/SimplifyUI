@@ -1,86 +1,54 @@
---- Universal Dimensions.
--- This object has an offset in pixels (characters) and a scale which is used heavily for positioning
--- @author fatboychummy
--- @type UDim
--- @alias mt
+--- UDim
+-- @module[kind=Instance] UDim
 
-local main = require "Objects.main"
-local BasicClass = require "Objects.BasicClass"
+local Instance = require "Objects.Instance"
 local expect = require "cc.expect".expect
-local UDim = BasicClass.New("UDim", {
-  --- Check if the input is a valid UDim.
-  -- @param dim The object you wish to test.
-  -- @treturn bool true if the object is a UDim, false otherwise.
-  IsValid = function(dim)
-    return type(dim) == "table" and dim.ClassName == "UDim"
-  end
-}, {}, true)
 
-local mtInject = {}
 
---- Add two UDims.
--- @tparam UDim dim1 LHS
--- @tparam UDim dim2 RHS
--- @treturn UDim dim1 + dim2
-function mtInject.__add(dim1, dim2)
-  if not UDim.IsValid(dim1) then
-    error("LHS is not a valid UDim.", 2)
-  end
-  if not UDim.IsValid(dim2) then
-    error("RHS is not a valid UDim.", 2)
-  end
-  return UDim.New(dim1.Scale + dim2.Scale, dim1.Offset + dim2.Offset)
+local UDim = {ClassName = "UDim", _creatable = true, _properties = {Scale = 0, Offset = 0}} --- @type UDim
+Instance.Register(UDim)
+
+--- Add two udims, used for __add operation.
+local function Add(u1, u2)
+  return Instance.new(UDim, u1.Scale + u2.Scale, u1.Offset + u2.Offset)
 end
 
---- Subtract a UDim from another UDim.
--- @tparam UDim dim1 LHS
--- @tparam UDim dim2 RHS
--- @treturn UDim dim1 - dim2
-function mtInject.__sub(dim1, dim2)
-  if not UDim.IsValid(dim1) then
-    error("LHS is not a valid UDim.", 2)
-  end
-  if not UDim.IsValid(dim2) then
-    error("RHS is not a valid UDim.", 2)
-  end
-  return UDim.New(dim1.Scale - dim2.Scale, dim1.Offset - dim2.Offset)
+--- Subtract two udims, used for __sub operation.
+local function Sub(u1, u2)
+  return Instance.new(UDim, u1.Scale - u2.Scale, u1.Offset - u2.Offset)
 end
 
-function mtInject.__eq(dim1, dim2)
-  if not UDim.IsValid(dim1) then
-    error("LHS is not a valid UDim.", 2)
+--- Create a new UDim. If you are calling `UDim.new` directly, remove `instanceData` and shift the arguments left by one.
+-- @tparam table|number instanceData Internal use, or the scale for direct call.
+-- @tparam number scale scale Internal use, or the offset for direct call.
+-- @tparam number|nil offset Internal use only.
+-- @treturn UDim The new object.
+function UDim.new(instanceData, scale, offset)
+  expect(1, instanceData, "table", "number")
+  expect(2, scale, "number")
+  expect(3, offset, "number", "nil")
+
+  -- creating UDim directly.
+  if type(instanceData) == "number" then
+    return Instance.new(UDim, instanceData, scale)
   end
-  if not UDim.IsValid(dim2) then
-    error("RHS is not a valid UDim.", 2)
+
+  -- creating UDim via Instance.new
+  instanceData.Scale = scale
+  instanceData.Offset = offset
+
+  -- create metatable instructions.
+  local mt = getmetatable(instanceData)
+
+  mt.__add = Add
+  mt.__sub = Sub
+
+  function instanceData._internal:Clone()
+    return Instance.new(UDim, self.Scale, self.Offset)
   end
-  return dim1.Scale == dim2.Scale and dim1.Offset == dim2.Offset
+
+  instanceData.WRITING = nil
+  return instanceData
 end
-
-function mtInject.__tostring(self)
-  return string.format("UDim: S=%.2f|O=%d", self.Scale, self.Offset)
-end
-
-UDim:New(function(scale, offset)
-  expect(1, scale, "number")
-  expect(2, offset, "number")
-
-  local obj = BasicClass.New("UDim", {}, {Scale = scale, Offset = offset})
-  local mt = getmetatable(obj)
-  obj:InjectMT(mtInject)
-
-  obj:SetPrePropertyChangedHandler(function(self, propertyName, newValue)
-    if type(newValue) == "number" then
-      return true
-    end
-
-    if propertyName == "Scale" or propertyName == "Offset" then
-      return false, {"number"}, false
-    end
-
-    return true
-  end)
-
-  return obj
-end)
 
 return UDim
