@@ -1,0 +1,42 @@
+{
+  name = "SimplifyUI-Tests",
+  remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/Simplifile",
+  files = {
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/Simplifile",
+      location = "Simplifile"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/CCTest-Framework/main/Framework/Expectations.lua",
+      location = "Framework/Expectations.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/CCTest-Framework/main/Framework/Test.lua",
+      location = "Framework/Test.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/CCTest-Framework/main/Framework/init.lua",
+      location = "Framework/init.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/main.lua",
+      location = "main.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/TestActor.lua",
+      location = "TestActor.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/TestInstance.lua",
+      location = "TestInstance.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/TestUDim.lua",
+      location = "TestUDim.lua"
+    },
+    {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/TestUDim2.lua",
+      location = "TestUDim2.lua"
+    },
+  }
+}
