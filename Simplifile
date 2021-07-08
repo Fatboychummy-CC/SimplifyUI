@@ -7,6 +7,10 @@
       location = "UI/init.lua"
     },
     {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Simplifile",
+      location = "UI/Simplifile"
+    },
+    {
       remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/Objects/Util/TableExtensions.lua",
       location = "UI/Objects/Util/TableExtensions.lua"
     },
