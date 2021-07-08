@@ -3,6 +3,10 @@
   name = "SimplifyUI",
   files = {
     {
+      remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/tests/Simplifile",
+      location = "UI/tests/Simplifile"
+    },
+    {
       remote = "https://raw.githubusercontent.com/Fatboychummy-CC/SimplifyUI/master/init.lua",
       location = "UI/init.lua"
     },
