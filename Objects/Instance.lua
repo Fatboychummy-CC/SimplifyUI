@@ -64,8 +64,9 @@ function Instance.CloneMetaTable()
       error("Invalid argument #1 to 'pairs' (table expected, got Instance)", 2)
     end,
     __index = function(self, idx) -- Index function, check if parent, else check instance table.
-      if idx == "Parent" then
-        return self._proxy.Parent
+      -- Check if it's in this table.
+      if self._proxy[idx] then
+        return self._proxy[idx]
       end
 
       -- Check through Instance and return it.
@@ -83,39 +84,40 @@ function Instance.CloneMetaTable()
       error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self:GetFullName()), 2)
     end,
     __newindex = function(self, idx, value)
-      if rawget(self, "WRITING") then
-        rawset(self, idx, value)
-      else
-        if idx == "Parent" then
-          if type(value) ~= "table" and value ~= nil  then
-            error(string.format("Invalid argument #3 (Instance or nil expected, got %s)", type(value)), 2)
-          end
-          if type(value) == "table" then
-            if not value.IsInstance then
-              error("Invalid argument #3 (Instance or nil expected, got table)", 2)
-            end
-
-            -- Tell the children metatable of the current parent to remove this value.
-            if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
-              self._proxy.Parent.Children[value] = nil
-            end
-
-            -- set the new parent
-            self._proxy.Parent = value
-
-            -- tell the children metatable of the new parent to add this as a child.
-            value.Children[self] = true
-          else
-            -- must be nil, tell parent to remove ourself from list of children
-            if self._proxy.Parent.Children then
-              self._proxy.Parent.Children[self] = nil
-              self._proxy.Parent = Instance.INSTANCE_ROOT
-            end
-          end
-        else
-          error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self:GetFullName()), 2)
+      if idx == "Parent" then
+        if type(value) ~= "table" and value ~= nil  then
+          error(string.format("Invalid argument #3 (Instance or nil expected, got %s)", type(value)), 2)
         end
+        if type(value) == "table" then
+          if not value.IsInstance then
+            error("Invalid argument #3 (Instance or nil expected, got table)", 2)
+          end
+
+          -- Tell the children metatable of the current parent to remove this value.
+          if self._proxy.Parent ~= Instance.INSTANCE_ROOT then
+            self._proxy.Parent.Children[value] = nil
+          end
+
+          -- set the new parent
+          self._proxy.Parent = value
+
+          -- tell the children metatable of the new parent to add this as a child.
+          value.Children[self] = true
+        else
+          -- must be nil, tell parent to remove ourself from list of children
+          if self._proxy.Parent.Children then
+            self._proxy.Parent.Children[self] = nil
+            self._proxy.Parent = Instance.INSTANCE_ROOT
+          end
+        end -- handle parent setting appropriately.
+      elseif not self._proxy[idx] then
+        error(string.format("%s is not a valid member of %s \"%s\"", idx, self.ClassName, self:GetFullName()), 2)
       end
+
+      -- set the value
+      self._proxy[idx] = value
+
+      self:GetActor()("PropertyChanged", idx, value)
     end
   }
 end
@@ -171,16 +173,15 @@ function Instance.new(class, ...)
 
   -- Register the data all instances should have.
   local AllInstances = {
-    IsInstance = true,
-    Archivable = true,
-    ClassName = class.ClassName,
-    Name = class.ClassName,
     Children = setmetatable({_proxy = {}}, childrenMetaTable),
     _proxy = {
       Parent = Instance.INSTANCE_ROOT,
-      Class = class
+      Class = class,
+      IsInstance = true,
+      Archivable = true,
+      ClassName = class.ClassName,
+      Name = class.ClassName
     },
-    WRITING = true,
     _internal = {}
   }
 
