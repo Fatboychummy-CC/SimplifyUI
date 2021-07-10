@@ -201,7 +201,7 @@ function Actor.Run(yieldFunc, main)
 
       repeat
         -- if the actor is listening for a specific event (and it matches that event), or the actor is listening for any event...
-        if actor and actor.events and actor.events[event] then
+        if actor and actor.events and actor.events[event] or actor and actor:Available() then
           -- resume the coroutine with the event data.
           local ok, result = resume(actor.coroutine, unpack(eventData, 1, eventData.n))
 
