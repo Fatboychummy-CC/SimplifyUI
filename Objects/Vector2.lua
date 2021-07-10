@@ -68,6 +68,11 @@ local function Div(self, other)
   return Instance.new(Vector2, self.X / other, self.Y / other)
 end
 
+local sqrt = math.sqrt
+local function CalcMagnitude(self)
+  return sqrt(self.X^2 + self.Y^2)
+end
+
 --- Create a new Vector2. If you are calling `Vector2.new` directly, remove `instanceData` and shift the arguments left by one.
 -- @tparam table|number instanceData Internal use, or the X value for direct call.
 -- @tparam number x  X value, or the Y value for direct call.
@@ -88,7 +93,7 @@ function Vector2.new(instanceData, x, y, dontCreateUnit)
   -- creating Vector2 via Instance.new
   instanceData.X = x
   instanceData.Y = y
-  instanceData.Magnitude = 0
+  instanceData.Magnitude = CalcMagnitude(instanceData)
   instanceData.Unit = Instance.new(Vector2, 0, 0, true) -- oh fuck
 
 
@@ -103,6 +108,13 @@ function Vector2.new(instanceData, x, y, dontCreateUnit)
   function instanceData._internal:Clone()
     return Instance.new(Vector2, self.X, self.Y)
   end
+
+  instanceData.Changed:Connect(function(idx, new)
+    if idx == "X" or idx == "Y" or idx == "Magnitude" then
+      -- set the proxy value directly so it doesn't generate recursive changed events.
+      instanceData._proxy.Magnitude = CalcMagnitude(instanceData)
+    end
+  end)
 
   instanceData._WRITING = nil
   return instanceData
