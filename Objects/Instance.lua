@@ -139,7 +139,7 @@ local function getProperties(class)
 
   if type(clone) == "table" then
     for k, v in pairs(clone) do
-      info[k] = v -- copy the data to our table.
+      info[k] = type(v) == "function" and v() or v -- copy the data to our table.
     end
   end
 
@@ -490,7 +490,7 @@ end
 
 function Instance:GetDebugID()
   expect(1, self, "table")
-  
+
   return self:GetActor().actorID
 end
 
