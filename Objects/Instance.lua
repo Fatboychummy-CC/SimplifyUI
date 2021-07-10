@@ -120,7 +120,7 @@ function Instance.CloneMetaTable()
         -- set the value
         self._proxy[idx] = value
 
-        self:GetActor()("PropertyChanged", idx, value)
+        self:GetActor()("ScriptSignal", "PropertyChanged", idx, value)
       end
     end
   }
@@ -189,6 +189,8 @@ function Instance.new(class, ...)
     _internal = {},
     _WRITING = true
   }
+
+  AllInstances.Changed = ScriptSignal(AllInstances, "PropertyChanged")
 
   -- Register the properties from parent classes, if applicable.
   local parents = Instance.Instances[class]
