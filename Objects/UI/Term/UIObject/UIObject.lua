@@ -4,18 +4,24 @@
 local Instance = require "Objects.Instance"
 local expect = require "cc.expect".expect
 
+local function newUDim2()
+  return Instance.new(UDim2, 0, 0, 0, 0)
+end
+local function newVector2()
+  return Instance.new(Vector2, 0, 0)
+end
 
 local UIObject = {
   ClassName = "UIObject",
   _creatable = false,
   _properties = {
     Visible = true,
-    AnchorPoint = UDim2.new(0, 0, 0, 0),
-    Position = UDim2.new(0, 0, 0, 0),
-    AbsolutePosition = Vector2.new(0, 0),
+    AnchorPoint = newUDim2,
+    Position = newUDim2,
+    AbsolutePosition = newVector2,
     AutomaticSize = AutomaticSize.None,
-    Size = UDim2.new(0, 0, 0, 0),
-    AbsoluteSIze = Vector2.new(0, 0),
+    Size = newUDim2,
+    AbsoluteSIze = newVector2,
     Selectable = false,
     Selected = false,
     Active = true,
