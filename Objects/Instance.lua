@@ -186,7 +186,8 @@ function Instance.new(class, ...)
       ClassName = class.ClassName,
       Name = class.ClassName
     },
-    _internal = {}
+    _internal = {},
+    _WRITING = true
   }
 
   -- Register the properties from parent classes, if applicable.

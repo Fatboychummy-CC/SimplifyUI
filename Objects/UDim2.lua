@@ -66,7 +66,7 @@ function UDim2.new(instanceData, xScale, xOffset, yScale, yOffset)
     return UDim2.fromUDims(self.X, self.Y)
   end
 
-  instanceData.WRITING = nil
+  instanceData._WRITING = nil
   return instanceData
 end
 

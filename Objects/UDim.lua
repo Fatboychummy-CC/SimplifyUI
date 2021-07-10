@@ -47,7 +47,7 @@ function UDim.new(instanceData, scale, offset)
     return Instance.new(UDim, self.Scale, self.Offset)
   end
 
-  instanceData.WRITING = nil
+  instanceData._WRITING = nil
   return instanceData
 end
 
