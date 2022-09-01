@@ -60,7 +60,7 @@ function Objects.new(property_dictionary, object_type)
     {
       __tostring = function(self)
         return string.format("Object: %s", self.__Type)
-      end
+      end,
       -- Index function to catch getting children and parent.
       __index = function(self, idx)
         if idx == "Parent" then
