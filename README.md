@@ -36,6 +36,7 @@ checkboxes? We got 'em. Want a few sliders? Got those too. Buttons? Yeah.
 - [ ] Smart positioning
   - [ ] Roblox UDim objects
   - [ ] Roblox UDim2 objects
+- [ ] Objects
 
 ## Fully buffered
 The overarching system is fully buffered and updated entirely at once, to avoid
@@ -126,6 +127,10 @@ We make use of Roblox's
 [UDim2](https://developer.roblox.com/en-us/api-reference/datatype/UDim2) objects 
 for these. Everything available on the developer forum to these objects are
 available in Simplify UI.
+
+## Objects
+A simple object system that allows you to create your own custom objects and
+attach them to other objects in this library.
 
 # Code samples
 
