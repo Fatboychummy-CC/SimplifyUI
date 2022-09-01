@@ -128,6 +128,12 @@ We make use of Roblox's
 for these. Everything available on the developer forum to these objects are
 available in Simplify UI.
 
+For that reason, they are not documented here.
+
+However, some simple information about them: They are not created using the
+[Object](Objects) library here, they cannot have a parent or anything. Instead,
+they are internal to some objects which require them.
+
 ## Objects
 A simple object system that allows you to create your own custom objects and
 attach them to other objects in this library.
