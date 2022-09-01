@@ -42,13 +42,18 @@ function Objects.new(property_dictionary, object_type)
     return copy(self.__Children)
   end
 
-  function obj:AddChild(child)
+  function obj:AddChild(child, switch)
     if child == self then
       error("Cannot add self to children.", 2)
     end
 
-    child.Parent = self
-    table.insert(self.__Children, child)
+    if not self:FindChild(child) then
+      table.insert(self.__Children, child)
+    end
+    
+    if not switch then
+      child.Parent = self
+    end
   end
 
   function obj:FindChild(child)
@@ -66,6 +71,7 @@ function Objects.new(property_dictionary, object_type)
       end,
       -- Index function to catch getting children and parent.
       __index = function(self, idx)
+        print("index:", idx)
         if idx == "Parent" then
           return self.__Parent
         elseif idx == "Children" then
@@ -74,13 +80,14 @@ function Objects.new(property_dictionary, object_type)
       end,
       -- New index to protect the parent value and children value.
       __newindex = function(self, idx, new_val)
+        print("New index:", idx, new_val)
         if idx == "Parent" then
           local _type = type(new_val)
           if _type ~= "table" and _type ~= "nil" then
             error("Cannot set parent to a non-table value (term object or object) or nil.", 2)
           end
 
-          local parent = self.__Parent
+          local parent = rawget(self, "__Parent")
 
           -- Check if there is already a parent
           if parent then
@@ -94,17 +101,19 @@ function Objects.new(property_dictionary, object_type)
           end
 
           -- Then set our parent to the new parent
-          self.__Parent = new_val
+          rawset(self, "__Parent", new_val)
 
           -- And check if the new parent is an object
           -- If not, it's likely just a term object.
           if _type == "table" and new_val.__IsObject then
             -- and add ourself to their list of children if so.
-            new_val:AddChild(self)
+            new_val:AddChild(self, true)
           end
         elseif idx == "Children" then
           error("Do not set the children this way. Use Object:AddChild() or change Child.Parent instead.", 2)
         end
+
+        return nil
       end
     }
   )
