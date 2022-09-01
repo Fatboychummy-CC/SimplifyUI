@@ -44,6 +44,10 @@ function Objects.new(property_dictionary, object_type)
   end
 
   function obj:AddChild(child)
+    if child == self then
+      error("Cannot add self to children.", 2)
+    end
+
     child.Parent = self
     table.insert(self.__Children, child)
   end
@@ -72,8 +76,9 @@ function Objects.new(property_dictionary, object_type)
       -- New index to protect the parent value and children value.
       __newindex = function(self, idx, new_val)
         if idx == "Parent" then
-          if type(new_val) ~= "table" then
-            error("Cannot set parent to a non-table value (term object or object).", 2)
+          local _type = type(new_val)
+          if _type ~= "table" and _type ~= "nil" then
+            error("Cannot set parent to a non-table value (term object or object) or nil.", 2)
           end
 
           local parent = self.__Parent
@@ -94,7 +99,7 @@ function Objects.new(property_dictionary, object_type)
 
           -- And check if the new parent is an object
           -- If not, it's likely just a term object.
-          if new_val.__IsObject then
+          if _type == "table" and new_val.__IsObject then
             -- and add ourself to their list of children if so.
             new_val:AddChild(self)
           end
