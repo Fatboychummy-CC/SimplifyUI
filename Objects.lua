@@ -1,5 +1,7 @@
 local expect = require "cc.expect".expect
 
+local UDim, UDim2 = require "UDim", require "UDim2"
+
 local Objects = {}
 
 local function dcopy(t)
@@ -37,6 +39,7 @@ function Objects.new(property_dictionary, object_type)
   obj.__Children = {}
   obj.__IsObject = true
   obj.__Type = object_type
+  obj.Position = UDim2.new()
 
   function obj:GetChildren()
     return copy(self.__Children)
