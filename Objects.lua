@@ -34,7 +34,6 @@ function Objects.new(property_dictionary, object_type)
 
   local obj = dcopy(property_dictionary)
 
-  obj.__Parent = term.current()
   obj.__Children = {}
   obj.__IsObject = true
   obj.__Type = object_type
