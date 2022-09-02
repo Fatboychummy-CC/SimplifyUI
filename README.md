@@ -173,10 +173,10 @@ All objects have the following properties and methods:
 - `obj:Redraw()`
   - Replicates `:Redraw()` to each parent until the topmost parent, at which
     point it calls `:Draw()` and `:DrawChildren()`.
-- `obj:Tick()`
-  - Calls the tick event, if this object is subscribed to it.
-- `obj:TickChildren()`
-  - Calls the tick event on all children, in unspecified order.
+- `obj:Push(event, ...)`
+  - Pushes an event to this object.
+- `obj:PushChildren(event, ...)`
+  - Pushes an event to all children, in non-specific order.
 
 ## Menus
 A menu is a collection of objects, they are what actually run your UI system.
