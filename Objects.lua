@@ -79,6 +79,14 @@ function Objects.new(property_dictionary, object_type)
     end
   end
 
+  function obj:DrawChildren()
+    local children = self._Children
+    table.sort(children, function(a, b) return a.DrawOrder < b.DrawOrder end)
+    for i = 1, #children do
+      children[i]:Draw()
+    end
+  end
+
   function obj:Push(event, ...)
     if self.Events[event] then
       for k, v in pairs(self.Events[event]) do
