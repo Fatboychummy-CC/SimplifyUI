@@ -157,7 +157,7 @@ All objects have the following properties and methods:
 - `obj.Events={}`
   - [Core events](#Core-Events) that this object is subscribed to, and function
     handlers for them.
-- `obj._OnFocus=thread`
+- `obj._OnFocus=thread|nil`
   - **It is recommended you do not touch this, but it is here for completion.**
   - The coroutine that is run when this object is focused.
   - Note this coroutine will be taken out of the resume pool when focus is lost,
