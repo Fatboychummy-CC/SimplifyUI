@@ -212,6 +212,8 @@ A menu is a collection of objects, they are what actually run your UI system.
 - `Menu:Tick()`
   - Ignored if `Menu.Debug` is `false`, otherwise is used to display debug
     information.
+- `Menu:SetFocus(object)`
+  - Set the current focus of this menu. Control will be given to that object.
 
 ## Core Events
 Each object can subscribe to events. Valid events are the following:

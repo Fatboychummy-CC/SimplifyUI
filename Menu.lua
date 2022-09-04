@@ -54,6 +54,14 @@ function Menu.new(...)
     end
   end
 
+  ---@param object Object The object to set the focus to.
+  function menu:SetFocus(object)
+    self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_STOP)
+    self.Focused = object
+    self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_YOURS)
+    os.queueEvent("focus_change")
+  end
+
   ---@param callback function? The function to be run in tandem with the menu.
   function menu:Run(callback)
     -- This needs to do the following:
@@ -124,10 +132,7 @@ function Menu.new(...)
 
               -- if we can move in that direction, change the focus.
               if selection then
-                self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_STOP)
-                self.Focused = selection
-                self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_YOURS)
-                os.queueEvent("focus_change")
+                self:SetFocus(selection)
               end
             end
           end
