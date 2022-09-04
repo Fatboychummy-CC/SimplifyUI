@@ -36,7 +36,7 @@ checkboxes? We got 'em. Want a few sliders? Got those too. Buttons? Yeah.
 - [ ] Smart positioning
   - [ ] Roblox UDim objects
   - [ ] Roblox UDim2 objects
-- [ ] Objects
+- [x] Objects
 - [ ] Core Events
 
 ## Fully buffered
@@ -163,6 +163,9 @@ All objects have the following properties and methods:
   - Note this coroutine will be taken out of the resume pool when focus is lost,
     regardless of what event the coroutine may have been waiting for. For this
     reason it is recommended you do not do any long yielding tasks here.
+  - Also note: The coroutine may be resumed without regard for what it is
+    waiting on. Always check if you received an event or if you were just cold
+    resumed. **This may change. I am unsure if I want this to be like this.**
 
 ### Methods
 - `obj:Draw()`
