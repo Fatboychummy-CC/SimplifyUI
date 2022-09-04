@@ -80,10 +80,6 @@ function Menu.new(...)
     parallel.waitForAny(
       function() -- Focused coroutine manager
         while true do
-          -- motherfucker I need to write an entire coroutine manager here
-          -- fuck
-          -- I'll put it in the fucking utilities lib
-
           if not self.Focused and not self.Focused._OnFocus then
             focus[1] = nil
             os.queueEvent("coroutine_focus")
