@@ -19,7 +19,7 @@ local Objects = {}
 ---@field Push function Push an event to this object.
 ---@field PushDescendants function Push an event to all descendants of this object.
 
-
+---@param t table The table to be deep-cloned.
 local function dcopy(t)
   local t_ = {}
   
@@ -34,6 +34,7 @@ local function dcopy(t)
   return t_
 end
 
+---@param t table The table to be surface-cloned.
 local function copy(t)
   local t_ = {}
 
