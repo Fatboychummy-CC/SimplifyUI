@@ -12,6 +12,10 @@ local Objects = {}
 ---@field Enabled boolean Whether this object is enabled or not (able to receive events, and is drawn)
 ---@field Events table The events this object has subscriptions to.
 ---@field Children table Equivalent to Object:GetChildren().
+---@field Left Object? The object marked as "to the left" of this object.
+---@field Right Object? The object marked as "to the right" of this object.
+---@field Down Object? The object marked as "below" this object.
+---@field Up Object? The object marked as "above" this object.
 ---
 ---@field GetChildren function Get the children of this object.
 ---@field GetDescendants function Get all descendants of this object.
