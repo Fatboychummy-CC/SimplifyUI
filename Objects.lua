@@ -4,6 +4,7 @@
 local expect = require "cc.expect".expect
 
 local UDim2 = require "SimplifyUI.UDim2"
+local Utilities = require "SimplifyUI.Utilities"
 
 local Objects = {}
 ---@class Object
@@ -31,32 +32,6 @@ local Objects = {}
 ---@field Push function Push an event to this object.
 ---@field PushDescendants function Push an event to all descendants of this object.
 
----@param t table The table to be deep-cloned.
-local function dcopy(t)
-  local t_ = {}
-  
-  for k, v in pairs(t) do
-    if type(v) == "table" then
-      t_[k] = dcopy(v)
-    else
-      t_[k] = v
-    end
-  end
-
-  return t_
-end
-
----@param t table The table to be surface-cloned.
-local function copy(t)
-  local t_ = {}
-
-  for k, v in pairs(t) do
-    t_[k] = v
-  end
-
-  return t_
-end
-
 --- Create a new object type.
 ---@param property_dictionary {string:any} The properties to initialize the object with.
 ---@param object_type string The name of the object's class.
@@ -66,7 +41,7 @@ function Objects.new(property_dictionary, object_type)
   expect(1, property_dictionary, "table")
   expect(2, object_type, "string")
 
-  local obj = dcopy(property_dictionary) ---@cast obj Object
+  local obj = Utilities.DCopy(property_dictionary) ---@cast obj Object
 
   obj._Children = {}
   obj._IsObject = true
@@ -78,10 +53,10 @@ function Objects.new(property_dictionary, object_type)
   obj.ClickBox = {}
   obj.DrawOrder = 0
   obj.Enabled = true
-  obj.Events = {} -- [[ {eventname = {id=listener, id=listener, ...}} ]]
+  obj.Events = {}
 
   function obj:GetChildren()
-    return copy(self._Children)
+    return Utilities.Copy(self._Children)
   end
 
   function obj:GetDescendants()

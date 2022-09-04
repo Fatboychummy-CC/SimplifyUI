@@ -5,13 +5,18 @@ local expect = require "cc.expect".expect
 
 local Utilities = {}
 
+--- Linear interpolation between two values.
 ---@param a number The value to lerp from.
 ---@param b number The value to lerp to.
----@param alpha number The point gotten between a and b (0-1)
+---@param alpha number The point between a and b (0-1)
+---@return number interpolated The interpolated value.
 function Utilities.Lerp(a, b, alpha)
   return a * (1-alpha) + b * alpha
 end
 
+--- Returns a function which can be used in parallel to run a specific coroutine
+--- as needed. 
+--- 
 --- Please note that the focused thread should NEVER stop, instead when control
 --- needs to change, it should be set to nil or the other thread.
 ---@return function Manager The coroutine manager.
@@ -59,6 +64,36 @@ function Utilities.FocusableCoroutine()
       end
     end
   end, focus
+end
+
+--- Deep-clones a table.
+---@param t table The table to be cloned.
+---@return table clone A clone of the table inputted.
+function Utilities.DCopy(t)
+  local clone = {}
+
+  for k, v in pairs(t) do
+    if type(v) == "table" then
+      clone[k] = Utilities.DCopy(v)
+    else
+      clone[k] = v
+    end
+  end
+
+  return clone
+end
+
+--- Surface-clones a table.
+---@param t table The table to be surface-cloned.
+---@return table clone A surface-level clone of the table inputted.
+function Utilities.Copy(t)
+  local clone = {}
+
+  for k, v in pairs(t) do
+    clone[k] = v
+  end
+
+  return clone
 end
 
 return Utilities
