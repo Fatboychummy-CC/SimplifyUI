@@ -7,10 +7,14 @@ local Objects = require "SimplifyUI.Objects"
 local Events = require "SimplifyUI.Events"
 
 local Menu = {}
+---@class Menu A menu object.
+---@field ParentWindows table The parent windows this menu will draw to.
+---@field TickRate number 
 
 --- Create a new menu object.
 ---@diagnostic disable-next-line
 ---@param ... Window The window objects to be drawn to.
+---@return Menu|Object
 ---@nodiscard
 function Menu.new(...)
   local menu = Objects.new(
@@ -21,21 +25,30 @@ function Menu.new(...)
     },
     "Menu"
   )
+  ---@cast menu +Menu
 
-  ---Send the TICK event to all descendants.
-  function Menu:TickDescendants()
-    Menu:PushDescendants(Events.TICK)
+  for i = 1, menu.ParentWindows.n do
+    local win = menu.ParentWindows[i]
+    ---@diagnostic disable-next-line
+    menu.ParentWindows[i] = window.create(win, 1, 1, win.getSize())
   end
 
-  Menu._DrawDescendants = Menu.DrawDescendants
-  function Menu:DrawDescendants()
-    Menu:PushDescendants(Events.PRE_DRAW)
+  ---Send the TICK event to all descendants.
+  function menu:TickDescendants()
+    self:PushDescendants(Events.TICK)
+  end
 
-    Menu:_DrawDescendants()
+  menu._DrawDescendants = menu.DrawDescendants
+  function menu:DrawDescendants()
+    self:PushDescendants(Events.PRE_DRAW)
+
+    for i = 1, self.ParentWindows.n do
+      self:_DrawDescendants()
+    end
   end
 
   ---@param callback function? The function to be run in tandem with the menu.
-  function Menu:Run(callback)
+  function menu:Run(callback)
 
   end
 
