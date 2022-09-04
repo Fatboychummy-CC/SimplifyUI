@@ -37,6 +37,7 @@ function Menu.new(...)
     local win = menu.ParentWindows[i]
     ---@diagnostic disable-next-line
     menu.ParentWindows[i] = window.create(win, 1, 1, win.getSize())
+    menu.ParentWindows[i].setVisible(false)
   end
 
   --- Send the TICK event to all descendants.
@@ -107,6 +108,14 @@ function Menu.new(...)
               tick_timer = os.startTimer(tick_speed)
             elseif event[2] == draw_timer then
               self:DrawDescendants()
+
+              -- if changed then
+              for _, win in ipairs(self.ParentWindows) do
+                win.setVisible(true)
+                win.setVisible(false)
+              end
+              -- end
+
               draw_timer = os.startTimer(draw_speed)
             end
           elseif event[1] == "key" and self.ArrowsFocus then
