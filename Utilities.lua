@@ -38,7 +38,7 @@ function Utilities.FocusableCoroutine()
       end
     end
 
-    -- Main loop: Pull event, resume coroutine.
+    -- Main loop: Pull event, check if we are changing focus, resume coroutine.
     while true do
       local event = table.pack(os.pullEvent())
 
