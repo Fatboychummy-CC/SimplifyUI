@@ -3,6 +3,22 @@ local expect = require "cc.expect".expect
 local UDim2 = require "SimplifyUI.UDim2"
 
 local Objects = {}
+---@class Objects
+---@field Position UDim2 The position of this object.
+---@field DrawOrder number The order this object will be drawn in. Lower values prioritized.
+---@field Enabled boolean Whether this object is enabled or not (able to receive events, and is drawn)
+---@field Events table The events this object has subscriptions to.
+---@field Children table Equivalent to Object:GetChildren().
+---
+---@field GetChildren function Get the children of this object.
+---@field GetDescendants function Get all descendants of this object.
+---@field AddChild function Add a child to this object.
+---@field FindChild function Find a specific child in this object.
+---@field Redraw function Replicate a redraw call up to parent, then have the parent redraw all descendants.
+---@field DrawDescendants function Draw all descendants of this object.
+---@field Push function Push an event to this object.
+---@field PushDescendants function Push an event to all descendants of this object.
+
 
 local function dcopy(t)
   local t_ = {}
@@ -29,7 +45,8 @@ local function copy(t)
 end
 
 --- Create a new object type.
--- 
+---@param property_dictionary table
+---@param object_type string
 function Objects.new(property_dictionary, object_type)
   expect(1, property_dictionary, "table")
   expect(2, object_type, "string")
@@ -68,6 +85,8 @@ function Objects.new(property_dictionary, object_type)
     return descendants
   end
 
+  ---@param child Objects The child object to be added.
+  ---@param switch boolean|nil If true, will set the child's parent as well.
   function obj:AddChild(child, switch)
     if child == self then
       error("Cannot add self to children.", 2)
@@ -84,6 +103,7 @@ function Objects.new(property_dictionary, object_type)
     end
   end
 
+  ---@param child Objects The child object to search for.
   function obj:FindChild(child)
     for i = 1, #self._Children do
       if self._Children[i] == child then
@@ -97,18 +117,22 @@ function Objects.new(property_dictionary, object_type)
       self._Parent:Redraw()
     else
       self:Draw()
-      self:DrawChildren()
+      self:DrawDescendants()
     end
   end
 
-  function obj:DrawChildren()
+  function obj:DrawDescendants()
     local children = self._Children
+
     table.sort(children, function(a, b) return a.DrawOrder < b.DrawOrder end)
     for i = 1, #children do
       children[i]:Draw()
+      children[i]:DrawChildren()
     end
   end
 
+  ---@param event string The event to be sent.
+  ---@param ... any The event arguments.
   function obj:Push(event, ...)
     if self.Events[event] then
       for k, v in pairs(self.Events[event]) do
@@ -117,10 +141,14 @@ function Objects.new(property_dictionary, object_type)
     end
   end
 
-  function obj:PushChildren(...)
+  ---@param event string The event to be sent.
+  ---@param ... any The event arguments.
+  function obj:PushChildren(event, ...)
     local children = self._Children
+
     for i = 1, #children do
-      children[i]:Push(...)
+      children[i]:Push(event, ...)
+      children[i]:PushChildren(event, ...)
     end
   end
 
@@ -167,11 +195,13 @@ function Objects.new(property_dictionary, object_type)
             -- and add ourself to their list of children if so.
             new_val:AddChild(self, true)
           end
+
+          return
         elseif idx == "Children" then
           error("Do not set the children this way. Use Object:AddChild() or change Child.Parent instead.", 2)
         end
 
-        return nil
+        rawset(self, idx, new_val)
       end
     }
   )

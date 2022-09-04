@@ -1,4 +1,8 @@
 local UDim = {}
+---@class UDim
+---@field new function Create a new UDim.
+---@field Scale number The scale value for this UDim.
+---@field Offset number The offset value for this UDim.
 
 function UDim.new(scale, offset)
   return setmetatable(

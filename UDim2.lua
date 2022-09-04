@@ -4,6 +4,12 @@ local UDim = require "SimplifyUI.UDim"
 local Utilities = require "SimplifyUI.Utilities"
 
 local UDim2 = {}
+---@class UDim2
+---@field new function Create a new UDim2.
+---@field X UDim The UDim representing the X axis.
+---@field Y UDim The UDim representing the Y axis.
+---@field Width UDim Equivalent to UDim2.X
+---@field Height UDim Equivalent to UDim2.Y
 
 function UDim2.new(scale_x, offset_x, scale_y, offset_y)
   local obj

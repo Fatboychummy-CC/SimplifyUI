@@ -167,17 +167,16 @@ All objects have the following properties and methods:
 ### Methods
 - `obj:Draw()`
   - Draws this object.
-- `obj:DrawChildren()`
-  - Sort children by draw order, then call `:Draw()` and `:DrawChildren()` on
+- `obj:DrawDescendants()`
+  - Sort children by draw order, then call `:Draw()` and `:DrawDescendants()` on
     each.
 - `obj:Redraw()`
   - Replicates `:Redraw()` to each parent until the topmost parent, at which
-    point it calls `:Draw()` and `:DrawChildren()`.
+    point it calls `:Draw()` and `:DrawDescendants()`.
 - `obj:Push(event, ...)`
   - Pushes an event to this object.
-- `obj:PushChildren(event, ...)`
-  - Pushes an event to all children, in non-specific order, causes it to
-    replicate to all other descendants as well.
+- `obj:PushDescendants(event, ...)`
+  - Pushes an event to all descendants.
 - `obj:GetChildren()`
   - Get the children of this object (equivalent to obj.Children).
 - `obj:GetDescendants()`
@@ -203,8 +202,10 @@ A menu is a collection of objects, they are what actually run your UI system.
   - The currently focused object. **Should not be set externally.**
 
 ### Methods
-- `Menu:TickChildren()`
-  - Fires the tick event to all children.
+- `Menu:TickDescendants()`
+  - Fires the tick event to all descendants of this object. This relies on the
+    fact that each object's `obj:TickChildren()` will also call
+    `child:TickChildren()`.
 - `Menu:Tick()`
   - Ignored if `Menu.Debug` is `false`, otherwise is used to display debug
     information.
