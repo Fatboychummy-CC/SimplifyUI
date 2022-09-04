@@ -8,14 +8,19 @@ local UDim2 = require "SimplifyUI.UDim2"
 local Objects = {}
 ---@class Object
 ---@field Position UDim2 The position of this object.
+---@field _Position {[1]:number,[2]:number} The absolute position of this object, updated when drawing.
+---@field Size UDim2 The size of this object.
+---@field _Size {[1]:number,[2]:number} The absolute size of this object, updated when drawing.
+---@field ClickBox {number:boolean} Positions in which clicking will click this object.
 ---@field DrawOrder number The order this object will be drawn in. Lower values prioritized.
 ---@field Enabled boolean Whether this object is enabled or not (able to receive events, and is drawn)
----@field Events table The events this object has subscriptions to.
----@field Children table Equivalent to Object:GetChildren().
+---@field Events {string:{number:function}} The events this object has subscriptions to.
+---@field Children {number:Object} Equivalent to Object:GetChildren().
 ---@field Left Object? The object marked as "to the left" of this object.
 ---@field Right Object? The object marked as "to the right" of this object.
 ---@field Down Object? The object marked as "below" this object.
 ---@field Up Object? The object marked as "above" this object.
+---@field _Children {number:Object}
 ---
 ---@field GetChildren function Get the children of this object.
 ---@field GetDescendants function Get all descendants of this object.
@@ -53,20 +58,24 @@ local function copy(t)
 end
 
 --- Create a new object type.
----@param property_dictionary table
----@param object_type string
----@return Object
+---@param property_dictionary {string:any} The properties to initialize the object with.
+---@param object_type string The name of the object's class.
+---@return Object obj The object initialized.
 ---@nodiscard
 function Objects.new(property_dictionary, object_type)
   expect(1, property_dictionary, "table")
   expect(2, object_type, "string")
 
-  local obj = dcopy(property_dictionary)
+  local obj = dcopy(property_dictionary) ---@cast obj Object
 
   obj._Children = {}
   obj._IsObject = true
   obj._Type = object_type
   obj.Position = UDim2.new()
+  obj.Size = UDim2.new()
+  obj._Position = {0, 0}
+  obj._Size = {0, 0}
+  obj.ClickBox = {}
   obj.DrawOrder = 0
   obj.Enabled = true
   obj.Events = {} -- [[ {eventname = {id=listener, id=listener, ...}} ]]
@@ -133,11 +142,30 @@ function Objects.new(property_dictionary, object_type)
 
   function obj:DrawDescendants()
     local children = self._Children
-
+    
     table.sort(children, function(a, b) return a.DrawOrder < b.DrawOrder end)
     for i = 1, #children do
       children[i]:Draw()
       children[i]:DrawChildren()
+    end
+  end
+
+  ---@param event Events The event to subscribe to.
+  ---@param name string The name of the connection. This is used for removing a listener.
+  ---@param listener function The function called when the event is pushed.
+  function obj:AddListener(event, name, listener)
+    if not self.Events[event] then
+      self.Events[event] = {}
+    end
+
+    self.Events[event][name] = listener
+  end
+
+  ---@param event Events The event to unsubscribe from.
+  ---@param name string The name of the connection to remove.
+  function obj:RemoveListener(event, name)
+    if self.Events[event] then
+      self.Events[event][name] = nil
     end
   end
 
