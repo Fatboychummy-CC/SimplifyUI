@@ -48,15 +48,37 @@ function Objects.new(property_dictionary, object_type)
     return copy(self._Children)
   end
 
+  function obj:GetDescendants()
+    local descendants = {}
+    
+    -- for each child
+    for _, child in ipairs(self._Children) do
+      -- insert the child
+      table.insert(descendants, child)
+
+      -- then get the child's descendants.
+      local descendants = child:GetDescendants()
+
+      -- and add them to the list.
+      for _, descendant in ipairs(descendants) do
+        table.insert(descendants, descendant)
+      end
+    end
+
+    return descendants
+  end
+
   function obj:AddChild(child, switch)
     if child == self then
       error("Cannot add self to children.", 2)
     end
 
+    -- ensure we aren't already a child.
     if not self:FindChild(child) then
       table.insert(self._Children, child)
     end
     
+    -- use the child's parent metavalue to update its parent.
     if not switch then
       child.Parent = self
     end

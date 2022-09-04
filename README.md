@@ -176,7 +176,12 @@ All objects have the following properties and methods:
 - `obj:Push(event, ...)`
   - Pushes an event to this object.
 - `obj:PushChildren(event, ...)`
-  - Pushes an event to all children, in non-specific order.
+  - Pushes an event to all children, in non-specific order, causes it to
+    replicate to all other descendants as well.
+- `obj:GetChildren()`
+  - Get the children of this object (equivalent to obj.Children).
+- `obj:GetDescendants()`
+  - Get all descendants of this object (children, grand-children, etc).
 
 ## Menus
 A menu is a collection of objects, they are what actually run your UI system.
