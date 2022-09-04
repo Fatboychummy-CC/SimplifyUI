@@ -12,8 +12,8 @@ function Utilities.Lerp(a, b, alpha)
   return a * (1-alpha) + b * alpha
 end
 
---- Please note that the focused coroutine should NEVER stop, instead when
---- control needs to change, it should be set to nil.
+--- Please note that the focused thread should NEVER stop, instead when control
+--- needs to change, it should be set to nil or the other thread.
 ---@return function Manager The coroutine manager.
 ---@return table Focus The sharable focus object, set Focus[1] to change the thread used.
 function Utilities.FocusableCoroutine()
