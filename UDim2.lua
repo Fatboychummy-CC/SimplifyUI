@@ -1,3 +1,6 @@
+---@author Fatboychummy
+---@meta
+
 local expect = require "cc.expect".expect
 
 local UDim = require "SimplifyUI.UDim"

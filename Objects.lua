@@ -1,9 +1,12 @@
+---@author Fatboychummy
+---@meta
+
 local expect = require "cc.expect".expect
 
 local UDim2 = require "SimplifyUI.UDim2"
 
 local Objects = {}
----@class Objects
+---@class Object
 ---@field Position UDim2 The position of this object.
 ---@field DrawOrder number The order this object will be drawn in. Lower values prioritized.
 ---@field Enabled boolean Whether this object is enabled or not (able to receive events, and is drawn)
@@ -48,6 +51,8 @@ end
 --- Create a new object type.
 ---@param property_dictionary table
 ---@param object_type string
+---@return Object
+---@nodiscard
 function Objects.new(property_dictionary, object_type)
   expect(1, property_dictionary, "table")
   expect(2, object_type, "string")
@@ -86,7 +91,7 @@ function Objects.new(property_dictionary, object_type)
     return descendants
   end
 
-  ---@param child Objects The child object to be added.
+  ---@param child Object The child object to be added.
   ---@param switch boolean|nil If true, will set the child's parent as well.
   function obj:AddChild(child, switch)
     if child == self then
@@ -104,7 +109,7 @@ function Objects.new(property_dictionary, object_type)
     end
   end
 
-  ---@param child Objects The child object to search for.
+  ---@param child Object The child object to search for.
   function obj:FindChild(child)
     for i = 1, #self._Children do
       if self._Children[i] == child then

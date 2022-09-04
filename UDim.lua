@@ -1,3 +1,6 @@
+---@author Fatboychummy
+---@meta
+
 local UDim = {}
 ---@class UDim
 ---@field new function Create a new UDim.

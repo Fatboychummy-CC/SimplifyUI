@@ -1,3 +1,6 @@
+---@author Fatboychummy
+---@meta
+
 local _require = require
 local function _require(name)
   return require("SimplifyUI." .. name)
