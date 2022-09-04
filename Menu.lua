@@ -39,11 +39,12 @@ function Menu.new(...)
     menu.ParentWindows[i] = window.create(win, 1, 1, win.getSize())
   end
 
-  ---Send the TICK event to all descendants.
+  --- Send the TICK event to all descendants.
   function menu:TickDescendants()
     self:PushDescendants(Events.TICK)
   end
 
+  --- Draw all descendants.
   menu._DrawDescendants = menu.DrawDescendants
   function menu:DrawDescendants()
     self:PushDescendants(Events.PRE_DRAW)
@@ -88,6 +89,7 @@ function Menu.new(...)
       end,
       focus_manager,
       function() -- Control
+        -- Start the timers
         local tick_timer = os.startTimer(tick_speed)
         local draw_timer = os.startTimer(draw_speed)
 
@@ -95,6 +97,7 @@ function Menu.new(...)
           local event = table.pack(os.pullEvent())
 
           if event[1] == "timer" then
+            -- Check if one of our timers expired.
             if event[2] == tick_timer then
               self:TickDescendants()
               tick_timer = os.startTimer(tick_speed)
@@ -103,10 +106,12 @@ function Menu.new(...)
               draw_timer = os.startTimer(draw_speed)
             end
           elseif event[1] == "key" and self.ArrowsFocus then
-            if self.Focused then
+            -- If arrows change focus, check for those
+            if self.Focused then -- if focused
               local key = event[1]
               local selection ---@type Object
 
+              -- determine which object we would be changing focus to.
               if key == keys.right then
                 selection = self.Focused.Right
               elseif key == keys.up then
@@ -117,6 +122,7 @@ function Menu.new(...)
                 selection = self.Focused.Down
               end
 
+              -- if we can move in that direction, change the focus.
               if selection then
                 self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_STOP)
                 self.Focused = selection
