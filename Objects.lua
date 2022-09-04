@@ -11,7 +11,7 @@ local Objects = {}
 ---@field _Position {[1]:number,[2]:number} The absolute position of this object, updated when drawing.
 ---@field Size UDim2 The size of this object.
 ---@field _Size {[1]:number,[2]:number} The absolute size of this object, updated when drawing.
----@field ClickBox {number:{number:boolean}} Positions in which clicking will click this object.
+---@field ClickBox {number:{number:boolean}} Positions (relative to the menu) in which clicking will click this object.
 ---@field DrawOrder number The order this object will be drawn in. Lower values prioritized.
 ---@field Enabled boolean Whether this object is enabled or not (able to receive events, and is drawn)
 ---@field Events {string:{number:function}} The events this object has subscriptions to.
