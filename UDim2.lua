@@ -14,6 +14,7 @@ local UDim2 = {}
 ---@field Width UDim Equivalent to UDim2.X
 ---@field Height UDim Equivalent to UDim2.Y
 
+---@
 function UDim2.new(scale_x, offset_x, scale_y, offset_y)
   local obj
   if type(scale_x) == "number" then
