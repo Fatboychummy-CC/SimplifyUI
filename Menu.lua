@@ -5,6 +5,7 @@ local expect = require "cc.expect".expect
 
 local Objects = require "SimplifyUI.Objects"
 local Events = require "SimplifyUI.Events"
+local Utilities = require "SimplifyUI.Utilities"
 
 local Menu = {}
 ---@class Menu A menu object.
@@ -65,10 +66,27 @@ function Menu.new(...)
     local tick_speed = 1 / self.TickRate
     local draw_speed = 1 / self.DrawSpeed
 
+    local focus_manager, focus = Utilities.FocusableCoroutine()
+    
     parallel.waitForAny(
-      function() -- Focused coroutine runner
+      function() -- Focused coroutine manager
+        while true do
+          -- motherfucker I need to write an entire coroutine manager here
+          -- fuck
+          -- I'll put it in the fucking utilities lib
 
+          if not self.Focused and not self.Focused._OnFocus then
+            focus[1] = nil
+            os.queueEvent("coroutine_focus")
+            os.pullEvent("focus_change")
+          end
+
+          focus[1] = self.Focused._OnFocus
+          os.queueEvent("coroutine_focus")
+          os.pullEvent("focus_change")
+        end
       end,
+      focus_manager,
       function() -- Control
         local tick_timer = os.startTimer(tick_speed)
         local draw_timer = os.startTimer(draw_speed)
@@ -102,6 +120,8 @@ function Menu.new(...)
               if selection then
                 self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_STOP)
                 self.Focused = selection
+                self.Focused:Push(Events.FOCUS_CHANGE_CONTROL_YOURS)
+                os.queueEvent("focus_change")
               end
             end
           end
