@@ -1,7 +1,7 @@
 local expect = require "cc.expect".expect
 
-local UDim = require "UDim"
-local Utilities = require "Utilities"
+local UDim = require "SimplifyUI.UDim"
+local Utilities = require "SimplifyUI.Utilities"
 
 local UDim2 = {}
 

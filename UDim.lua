@@ -15,7 +15,7 @@ function UDim:__add(other)
 end
 
 function UDim:__sub(other)
-  return Udim.new(self.Scale - other.Scale, self.Offset - other.Offset)
+  return UDim.new(self.Scale - other.Scale, self.Offset - other.Offset)
 end
 
 return UDim
