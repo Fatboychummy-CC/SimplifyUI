@@ -34,10 +34,10 @@ checkboxes? We got 'em. Want a few sliders? Got those too. Buttons? Yeah.
   - [ ] Make custom shapes
   - [ ] Attach objects
 - [ ] Smart positioning
-  - [ ] Roblox UDim objects
-  - [ ] Roblox UDim2 objects
+  - [x] Roblox UDim objects
+  - [x] Roblox UDim2 objects
 - [x] Objects
-- [ ] Core Events
+- [x] Core Events
 
 ## Fully buffered
 The overarching system is fully buffered and updated entirely at once, to avoid
