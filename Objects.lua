@@ -10,9 +10,11 @@ local Objects = {}
 ---@class Object
 ---@field Position UDim2 The position of this object.
 ---@field _Position {[1]:number,[2]:number} The absolute position of this object, updated when drawing.
+---@field AnchorPoint UDim2 The position on this object that this object is positioned relatively to the parent.
+---@field _AnchorPoint {[1]:number,[2]:number} The absolute position of the anchorpoint of this object. Updated when drawing.
 ---@field Size UDim2 The size of this object.
 ---@field _Size {[1]:number,[2]:number} The absolute size of this object, updated when drawing.
----@field ClickBox {number:{number:boolean}} Positions (relative to the menu) in which clicking will click this object.
+---@field ClickBox {number:{number:boolean}} Positions (relative to the menu) in which clicking will click this object. Updated when drawing.
 ---@field DrawOrder number The order this object will be drawn in. Lower values prioritized.
 ---@field Enabled boolean Whether this object is enabled or not (able to receive events, and is drawn)
 ---@field Events {string:{number:function}} The events this object has subscriptions to.
@@ -47,8 +49,10 @@ function Objects.new(property_dictionary, object_type)
   obj._IsObject = true
   obj._Type = object_type
   obj.Position = UDim2.new()
+  obj.AnchorPoint = UDim2.new()
   obj.Size = UDim2.new()
   obj._Position = {0, 0}
+  obj._AnchorPoint = {0, 0}
   obj._Size = {0, 0}
   obj.ClickBox = {}
   obj.DrawOrder = 0
